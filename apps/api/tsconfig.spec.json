@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "strict": false,
+    "outDir": "../../dist/out-tsc",
+    "module": "node20",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": ["**/*.test.ts", "**/*.test.tsx", "**/*.d.ts", "jest.config.ts"]
+}

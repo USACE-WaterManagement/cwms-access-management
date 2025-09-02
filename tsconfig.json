@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "outDir": "dist/out-tsc",
+    "skipLibCheck": true
+  }
+}

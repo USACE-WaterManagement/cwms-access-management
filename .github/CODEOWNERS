@@ -1,0 +1,14 @@
+# Global owners will be the default reviewers for everything in the repo
+# unless a later match takes precedence.
+*       @LEYC # Vairav
+*       @CXXQ # Ryan
+
+# Service-specific ownership
+
+# Documentation ownership
+
+# Infrastructure and deployment
+
+# Shared libraries and utilities
+
+# Configuration files

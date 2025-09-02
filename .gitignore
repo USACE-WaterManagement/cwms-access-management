@@ -1,0 +1,22 @@
+node_modules
+lib
+
+# sst
+.sst
+env.ts
+
+# IDE folders and files
+.idea
+.vscode
+
+# env file
+.env
+
+
+
+.nx/cache
+.nx/workspace-data
+
+dist
+apps/services/entity-manager/admin_token.json
+.DS_Store
