@@ -1,7 +1,7 @@
 {
   "name": "api",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/api/src",
+  "sourceRoot": "apps/api",
   "projectType": "application",
   "targets": {
     "build": {
@@ -11,13 +11,13 @@
       ],
       "options": {
         "outputPath": "dist/{projectRoot}",
-        "main": "{projectRoot}/src/index.ts",
+        "main": "{projectRoot}/server.ts",
         "tsConfig": "{projectRoot}/tsconfig.app.json",
         "platform": "node",
         "bundle": true,
         "thirdParty": true,
         "format": [
-          "cjs"
+          "esm"
         ],
         "external": [
           "node:*"

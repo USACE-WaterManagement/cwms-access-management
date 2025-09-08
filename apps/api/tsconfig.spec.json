@@ -3,7 +3,7 @@
   "compilerOptions": {
     "strict": false,
     "outDir": "../../dist/out-tsc",
-    "module": "node20",
+    "module": "commonjs",
     "types": [
       "jest",
       "node"

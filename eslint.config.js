@@ -1,40 +1,41 @@
 // @ts-check
-const _import = require('eslint-plugin-import');
-const nx = require('@nx/eslint-plugin');
-const prettierRecommended = require('eslint-config-prettier');
-const nxTypescript = require('@nx/eslint-plugin/typescript');
-const prettierPlugin = require('eslint-plugin-prettier');
-const tsPlugin = require('@typescript-eslint/eslint-plugin');
-const tsParser = require('@typescript-eslint/parser');
+import _import from 'eslint-plugin-import';
+import nx from '@nx/eslint-plugin';
+import prettierPlugin from 'eslint-plugin-prettier';
+import js from '@eslint/js';
+import globals from 'globals';
+import tsEslint from 'typescript-eslint';
 
-/** @type {import('eslint').Linter.FlatConfig[]} */
-module.exports = [
+export default [
+  js.configs.recommended,
+  ...tsEslint.configs.recommended,
   {
     plugins: {
       import: _import,
       '@nx': nx,
       prettier: prettierPlugin,
-      '@typescript-eslint': tsPlugin,
     },
     languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        projectService: true
-      },
       globals: {
         globalThis: 'readonly',
       },
     },
   },
   {
-    files: ['**/*.config.cjs'],
-    extends: ['eslint:recommended'],
-    env: {
-      node: true,
+    files: ['**/*.config.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
     },
   },
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
+    languageOptions: {
+      parserOptions: {
+        projectService: true
+      },
+    },
     rules: {
       camelcase: 'off',
       'prettier/prettier': 'error',
@@ -53,7 +54,6 @@ module.exports = [
             },
           ],
           'newlines-between': 'always',
-          // caseInsensitive: true,
         },
       ],
       'newline-before-return': 'error',
@@ -84,7 +84,7 @@ module.exports = [
         },
       ],
       '@typescript-eslint/no-useless-empty-export': 'error',
-      '@typescript-eslint/no-non-null-assertion': 'off', // Add this line
+      '@typescript-eslint/no-non-null-assertion': 'off',
     },
   },
 ];
