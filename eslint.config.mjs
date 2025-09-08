@@ -1,4 +1,3 @@
-// @ts-check
 import _import from 'eslint-plugin-import';
 import nx from '@nx/eslint-plugin';
 import prettierPlugin from 'eslint-plugin-prettier';
