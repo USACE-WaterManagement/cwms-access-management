@@ -14,7 +14,7 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "ESNext",
-    "module": "esnext",
+    "module": "Node16",
     "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
