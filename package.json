@@ -7,6 +7,7 @@
     "preinstall": "npx only-allow pnpm",
     "build": "nx run-many -t build",
     "lint": "nx run-many -t lint",
+    "dev": "nx run-many -t serve -p api --configuration=development --verbose --parallel=8",
     "run-all": "nx run-many -t serve -p api --verbose --parallel=8",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:direct": "esbuild apps/services/approvals/src/index.ts --bundle --platform=node --outdir=dist/test"

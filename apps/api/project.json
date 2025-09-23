@@ -19,11 +19,13 @@
         "format": [
           "esm"
         ],
-        "external": [
-          "node:*"
-        ],
-        "packages": "inline",
-        "watch": false
+        "packages": "external",
+        "watch": false,
+        "esbuildOptions": {
+          "banner": {
+            "js": "import { createRequire } from 'module'; const require = createRequire(import.meta.url);"
+          }
+        }
       },
       "configurations": {
         "development": {
