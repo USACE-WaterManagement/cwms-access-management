@@ -1,7 +1,7 @@
 {
-  "name": "api",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/api",
+  "name": "authorizer-proxy",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/services/authorizer-proxy",
   "projectType": "application",
   "targets": {
     "build": {
@@ -11,7 +11,7 @@
       ],
       "options": {
         "outputPath": "dist/{projectRoot}",
-        "main": "{projectRoot}/server.ts",
+        "main": "{projectRoot}/src/server.ts",
         "tsConfig": "{projectRoot}/tsconfig.app.json",
         "platform": "node",
         "bundle": true,
@@ -19,7 +19,6 @@
         "format": [
           "esm"
         ],
-        "packages": "external",
         "watch": false,
         "esbuildOptions": {
           "banner": {
@@ -39,13 +38,13 @@
     "serve": {
       "executor": "@nx/js:node",
       "options": {
-        "buildTarget": "api:build",
+        "buildTarget": "authorizer-proxy:build",
         "watch": true,
         "inspect": false
       },
       "configurations": {
         "development": {
-          "buildTarget": "api:build:development"
+          "buildTarget": "authorizer-proxy:build:development"
         }
       }
     },
@@ -66,13 +65,13 @@
         "{workspaceRoot}/coverage/{projectRoot}"
       ],
       "options": {
-        "jestConfig": "apps/api/jest.config.ts"
+        "jestConfig": "{projectRoot}/jest.config.ts"
       }
     },
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "apps/api",
+        "cwd": "{projectRoot}",
         "command": "tsc -b --noEmit ."
       }
     }

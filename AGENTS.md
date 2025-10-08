@@ -1,6 +1,7 @@
 # AGENTS.md - CWMS Access Management
 
 ## Build/Test Commands
+
 - `pnpm build` - Build all apps using Nx
 - `pnpm lint` - Lint all code using ESLint
 - `pnpm run-all` - Start all services in parallel
@@ -9,7 +10,9 @@
 - `nx lint <app-name>` - Lint a specific app
 
 ## Code Style Guidelines
-- **Imports**: Use sorted imports with newlines between groups (external, internal). React imports first for React files.
+
+- **Imports**: Use sorted imports with newlines between groups (external, internal). React imports first for React
+  files.
 - **Formatting**: Prettier with 120 char line width, single quotes, trailing commas, 2-space indentation
 - **Types**: TypeScript strict mode enabled. Use explicit types, avoid `any` (warn level)
 - **Naming**: Use camelCase for variables/functions, PascalCase for components/classes

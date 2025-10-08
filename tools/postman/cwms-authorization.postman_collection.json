@@ -1,0 +1,487 @@
+{
+  "info": {
+    "name": "CWMS Authorization Proxy",
+    "description": "Complete test suite for CWMS Authorization Proxy with OPA whitelist pattern",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Health Check",
+      "item": [
+        {
+          "name": "Proxy Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["health"]
+            },
+            "description": "Check if authorization proxy is healthy"
+          }
+        },
+        {
+          "name": "Proxy Ready",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/ready",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["ready"]
+            },
+            "description": "Check if proxy can reach downstream API"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Authentication",
+      "item": [
+        {
+          "name": "Get JWT Token - m5hectest",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "m5hectest",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "m5hectest",
+                  "type": "text"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "cwms",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/auth/realms/cwms/protocol/openid-connect/token",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["auth", "realms", "cwms", "protocol", "openid-connect", "token"]
+            },
+            "description": "Get JWT token for m5hectest user (SWT office, cwms_user role)"
+          }
+        },
+        {
+          "name": "Get JWT Token - l2hectest",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "l2hectest",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "l2hectest",
+                  "type": "text"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "cwms",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/auth/realms/cwms/protocol/openid-connect/token",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["auth", "realms", "cwms", "protocol", "openid-connect", "token"]
+            },
+            "description": "Get JWT token for l2hectest user (SPK office, cwms_user role)"
+          }
+        },
+        {
+          "name": "Get JWT Token - l1hectest",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "l1hectest",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "l1hectest",
+                  "type": "text"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "cwms",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/auth/realms/cwms/protocol/openid-connect/token",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["auth", "realms", "cwms", "protocol", "openid-connect", "token"]
+            },
+            "description": "Get JWT token for l1hectest user (SPL office, no roles - for testing access denial)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Whitelisted Endpoints (OPA Enforced)",
+      "item": [
+        {
+          "name": "Offices - Anonymous (ALLOWED)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/cwms-data/offices",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["cwms-data", "offices"]
+            },
+            "description": "Offices endpoint is whitelisted and public - should be allowed even without user context"
+          }
+        },
+        {
+          "name": "Offices - User m5hectest (ALLOWED)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-test-user",
+                "value": "{\"id\":\"m5hectest\",\"username\":\"m5hectest\",\"email\":\"m5hectest@usace.mil\",\"roles\":[\"cwms_user\"],\"offices\":[\"SWT\"]}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3001/cwms-data/offices",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["cwms-data", "offices"]
+            },
+            "description": "Offices endpoint with user context - should include x-cwms-auth-context header"
+          }
+        },
+        {
+          "name": "Offices - User l1hectest No Roles (STILL ALLOWED)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-test-user",
+                "value": "{\"id\":\"l1hectest\",\"username\":\"l1hectest\",\"email\":\"l1hectest@usace.mil\",\"roles\":[],\"offices\":[\"SPL\"]}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3001/cwms-data/offices",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["cwms-data", "offices"]
+            },
+            "description": "Offices is public - allowed even for users with no roles"
+          }
+        },
+        {
+          "name": "Timeseries - Anonymous (DEPENDS ON OPA)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/cwms-data/timeseries",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["cwms-data", "timeseries"]
+            },
+            "description": "Timeseries endpoint is whitelisted - OPA will make authorization decision"
+          }
+        },
+        {
+          "name": "Timeseries - User m5hectest (DEPENDS ON OPA)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-test-user",
+                "value": "{\"id\":\"m5hectest\",\"username\":\"m5hectest\",\"email\":\"m5hectest@usace.mil\",\"roles\":[\"cwms_user\"],\"offices\":[\"SWT\"]}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3001/cwms-data/timeseries",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["cwms-data", "timeseries"]
+            },
+            "description": "Timeseries with user context - OPA evaluates based on policy"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Non-Whitelisted Endpoints (Bypass OPA)",
+      "item": [
+        {
+          "name": "Levels - Anonymous (BYPASSED)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/cwms-data/levels",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["cwms-data", "levels"]
+            },
+            "description": "Levels endpoint is NOT whitelisted - bypasses OPA and proxies directly to API"
+          }
+        },
+        {
+          "name": "Levels - User m5hectest (BYPASSED)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-test-user",
+                "value": "{\"id\":\"m5hectest\",\"username\":\"m5hectest\",\"email\":\"m5hectest@usace.mil\",\"roles\":[\"cwms_user\"],\"offices\":[\"SWT\"]}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3001/cwms-data/levels",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["cwms-data", "levels"]
+            },
+            "description": "Levels with user - still bypasses OPA, no auth context header added"
+          }
+        },
+        {
+          "name": "Locations - Anonymous (BYPASSED)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/cwms-data/locations",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["cwms-data", "locations"]
+            },
+            "description": "Locations endpoint is NOT whitelisted - bypasses OPA"
+          }
+        },
+        {
+          "name": "Parameters - Anonymous (BYPASSED)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/cwms-data/parameters",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["cwms-data", "parameters"]
+            },
+            "description": "Parameters endpoint is NOT whitelisted - bypasses OPA"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Direct API Comparison",
+      "item": [
+        {
+          "name": "Direct API - Offices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:7001/cwms-data/offices",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7001",
+              "path": ["cwms-data", "offices"]
+            },
+            "description": "Direct call to CWMS Data API (bypassing proxy entirely)"
+          }
+        },
+        {
+          "name": "Direct API - Levels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:7001/cwms-data/levels",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7001",
+              "path": ["cwms-data", "levels"]
+            },
+            "description": "Direct call to CWMS Data API for levels"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Direct OPA Policy Testing",
+      "item": [
+        {
+          "name": "OPA - Test Offices (Public)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"input\": {\n    \"user\": {\n      \"roles\": [],\n      \"offices\": [\"HQ\"]\n    },\n    \"resource\": \"offices\",\n    \"action\": \"read\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8181/v1/data/cwms/authz/allow",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8181",
+              "path": ["v1", "data", "cwms", "authz", "allow"]
+            },
+            "description": "Test OPA policy directly - offices is public endpoint"
+          }
+        },
+        {
+          "name": "OPA - Test Timeseries (No Roles)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"input\": {\n    \"user\": {\n      \"roles\": [],\n      \"offices\": [\"HQ\"]\n    },\n    \"resource\": \"timeseries\",\n    \"action\": \"read\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8181/v1/data/cwms/authz/allow",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8181",
+              "path": ["v1", "data", "cwms", "authz", "allow"]
+            },
+            "description": "Test OPA policy for timeseries with no roles"
+          }
+        },
+        {
+          "name": "OPA - Test Timeseries (With Role)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"input\": {\n    \"user\": {\n      \"roles\": [\"cwms_user\"],\n      \"offices\": [\"SWT\"]\n    },\n    \"resource\": \"timeseries\",\n    \"action\": \"read\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8181/v1/data/cwms/authz/allow",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8181",
+              "path": ["v1", "data", "cwms", "authz", "allow"]
+            },
+            "description": "Test OPA policy for timeseries with cwms_user role"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "proxy_url",
+      "value": "http://localhost:3001",
+      "type": "string"
+    },
+    {
+      "key": "api_url",
+      "value": "http://localhost:7001",
+      "type": "string"
+    },
+    {
+      "key": "keycloak_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "opa_url",
+      "value": "http://localhost:8181",
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+services:
+  # Authorization Proxy Service
+  authorizer-proxy:
+    container_name: authorizer-proxy
+    build:
+      context: .
+      dockerfile: apps/services/authorizer-proxy/Dockerfile
+    image: cwms-authorizer-proxy:local-dev
+    ports:
+      - "${AUTHORIZER_PROXY_PORT:-3001}:${PORT:-3001}"
+    environment:
+      # Server Configuration (from .env)
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${PORT:-3001}
+      HOST: ${HOST:-0.0.0.0}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      # CWMS Data API Configuration (from .env)
+      CWMS_API_URL: ${CWMS_API_URL:-http://data-api:7000/cwms-data}
+      CWMS_API_TIMEOUT: ${CWMS_API_TIMEOUT:-30000}
+      # OPA Configuration (from .env)
+      OPA_URL: ${OPA_URL:-http://opa:8181}
+      OPA_POLICY_PATH: ${OPA_POLICY_PATH:-/v1/data/cwms/authz/allow}
+      # Redis Configuration (from .env)
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      # Authorization Configuration (from .env)
+      BYPASS_AUTH: ${BYPASS_AUTH:-false}
+      # Cache Configuration (from .env)
+      CACHE_TTL_SECONDS: ${CACHE_TTL_SECONDS:-300}
+      CACHE_MAX_SIZE: ${CACHE_MAX_SIZE:-1000}
+      # OPA Whitelist Configuration (from .env - SINGLE SOURCE OF TRUTH)
+      # Set this in .env file or load from opa-whitelist.json using ./scripts/load-whitelist.sh
+      OPA_WHITELIST_ENDPOINTS: ${OPA_WHITELIST_ENDPOINTS:-["/cwms-data/timeseries","/cwms-data/offices"]}
+    depends_on:
+      - redis
+      - opa
+    networks:
+      - cwmsdb_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Redis Cache Service
+  redis:
+    container_name: redis-cache
+    image: redis:7-alpine
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    networks:
+      - cwmsdb_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Open Policy Agent (OPA) Service
+  opa:
+    container_name: opa
+    image: openpolicyagent/opa:0.68.0-envoy
+    ports:
+      - "${OPA_PORT:-8181}:8181"
+    volumes:
+      - ./policies:/policies
+    command: >
+      run
+      --server
+      --addr=:8181
+      --diagnostic-addr=:8282
+      --set=plugins.envoy_ext_authz_grpc.addr=:9191
+      --set=plugins.envoy_ext_authz_grpc.query=data.cwms.authz.allow
+      --set=decision_logs.console=true
+      --log-level=debug
+      /policies
+    networks:
+      - cwmsdb_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8181/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  cwmsdb_net:
+    external: true
+    name: ${NETWORK_NAME:-cwmsdb_net}

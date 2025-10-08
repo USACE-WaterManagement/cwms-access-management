@@ -1,20 +1,25 @@
 {
-  "name": "cwms-iam",
+  "name": "cwms-access-management",
   "version": "0.1.0",
+  "description": "CWMS Access Management",
   "main": "index.js",
   "type": "module",
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": ">=10.0.0"
+  },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "build": "nx run-many -t build",
     "lint": "nx run-many -t lint",
-    "dev": "nx run-many -t serve -p api --configuration=development --verbose --parallel=8",
-    "run-all": "nx run-many -t serve -p api --verbose --parallel=8",
+    "dev": "nx run-many -t serve -p authorizer-proxy --configuration=development --verbose --parallel=8",
+    "run-all": "nx run-many -t serve -p authorizer-proxy --verbose --parallel=8",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:direct": "esbuild apps/services/approvals/src/index.ts --bundle --platform=node --outdir=dist/test"
   },
   "private": true,
   "keywords": [],
-  "author": "",
+  "author": "Solid Logix, LLC",
   "license": "ISC",
   "devDependencies": {
     "@eslint/compat": "^1.2.4",
@@ -46,6 +51,5 @@
     "typescript": "^5.6.2",
     "typescript-eslint": "^8.42.0",
     "vitest": "^3.0.6"
-  },
-  "description": ""
+  }
 }
