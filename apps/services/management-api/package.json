@@ -1,0 +1,28 @@
+{
+  "name": "@cwms-access-management/management-api",
+  "version": "0.1.0",
+  "description": "Management API for CWMS Access Management",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts"
+  },
+  "author": "Solid Logix, LLC",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@fastify/cors": "^11.1.0",
+    "@fastify/env": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "axios": "^1.7.7",
+    "fastify": "^5.5.0",
+    "jsonwebtoken": "^9.0.2",
+    "pino": "^10.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.5",
+    "tsx": "^4.19.2"
+  }
+}

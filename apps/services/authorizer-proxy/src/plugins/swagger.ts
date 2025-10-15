@@ -13,22 +13,22 @@ export async function registerSwagger(fastify: FastifyInstance): Promise<void> {
         version: '1.0.0',
         contact: {
           name: 'CWMS Access Management Team',
-          email: 'support@example.com'
+          email: 'support@example.com',
         },
         license: {
           name: 'MIT',
-          url: 'https://opensource.org/licenses/MIT'
-        }
+          url: 'https://opensource.org/licenses/MIT',
+        },
       },
       servers: [
         {
           url: 'http://localhost:3001',
-          description: 'Development server'
+          description: 'Development server',
         },
         {
           url: 'http://authorizer-proxy:3001',
-          description: 'Docker/Container environment'
-        }
+          description: 'Docker/Container environment',
+        },
       ],
       components: {
         securitySchemes: {
@@ -36,14 +36,14 @@ export async function registerSwagger(fastify: FastifyInstance): Promise<void> {
             type: 'apiKey',
             in: 'header',
             name: 'x-test-user',
-            description: 'Test user context for development (JSON object)'
+            description: 'Test user context for development (JSON object)',
           },
           bearerAuth: {
             type: 'http',
             scheme: 'bearer',
             bearerFormat: 'JWT',
-            description: 'JWT Bearer token for authentication'
-          }
+            description: 'JWT Bearer token for authentication',
+          },
         },
         schemas: {
           HealthResponse: {
@@ -52,19 +52,19 @@ export async function registerSwagger(fastify: FastifyInstance): Promise<void> {
               status: {
                 type: 'string',
                 enum: ['healthy', 'unhealthy'],
-                example: 'healthy'
+                example: 'healthy',
               },
               timestamp: {
                 type: 'string',
                 format: 'date-time',
-                example: '2025-09-29T10:00:00.000Z'
+                example: '2025-09-29T10:00:00.000Z',
               },
               service: {
                 type: 'string',
-                example: 'authorizer-proxy'
-              }
+                example: 'authorizer-proxy',
+              },
             },
-            required: ['status', 'timestamp', 'service']
+            required: ['status', 'timestamp', 'service'],
           },
           ReadyResponse: {
             type: 'object',
@@ -72,34 +72,34 @@ export async function registerSwagger(fastify: FastifyInstance): Promise<void> {
               status: {
                 type: 'string',
                 enum: ['ready', 'not-ready'],
-                example: 'ready'
+                example: 'ready',
               },
               downstream: {
                 type: 'string',
                 enum: ['available', 'unavailable'],
-                example: 'available'
+                example: 'available',
               },
               timestamp: {
                 type: 'string',
                 format: 'date-time',
-                example: '2025-09-29T10:00:00.000Z'
-              }
+                example: '2025-09-29T10:00:00.000Z',
+              },
             },
-            required: ['status', 'downstream', 'timestamp']
+            required: ['status', 'downstream', 'timestamp'],
           },
           ErrorResponse: {
             type: 'object',
             properties: {
               error: {
                 type: 'string',
-                example: 'Forbidden'
+                example: 'Forbidden',
               },
               message: {
                 type: 'string',
-                example: 'You do not have permission to access this resource'
-              }
+                example: 'You do not have permission to access this resource',
+              },
             },
-            required: ['error', 'message']
+            required: ['error', 'message'],
           },
           AuthContext: {
             type: 'object',
@@ -109,83 +109,83 @@ export async function registerSwagger(fastify: FastifyInstance): Promise<void> {
                 properties: {
                   allow: {
                     type: 'boolean',
-                    example: true
+                    example: true,
                   },
                   decision_id: {
                     type: 'string',
-                    example: 'proxy-1759138056211-4bd7dul0f'
-                  }
+                    example: 'proxy-1759138056211-4bd7dul0f',
+                  },
                 },
-                required: ['allow', 'decision_id']
+                required: ['allow', 'decision_id'],
               },
               user: {
                 type: 'object',
                 properties: {
                   id: {
                     type: 'string',
-                    example: 'user-123'
+                    example: 'user-123',
                   },
                   username: {
                     type: 'string',
-                    example: 'john.doe'
+                    example: 'john.doe',
                   },
                   email: {
                     type: 'string',
                     format: 'email',
-                    example: 'john.doe@usace.mil'
+                    example: 'john.doe@usace.mil',
                   },
                   roles: {
                     type: 'array',
                     items: {
-                      type: 'string'
+                      type: 'string',
                     },
-                    example: ['water_manager', 'data_manager']
+                    example: ['water_manager', 'data_manager'],
                   },
                   offices: {
                     type: 'array',
                     items: {
-                      type: 'string'
+                      type: 'string',
                     },
-                    example: ['SPK', 'SWT']
+                    example: ['SPK', 'SWT'],
                   },
                   primary_office: {
                     type: 'string',
-                    example: 'SPK'
-                  }
+                    example: 'SPK',
+                  },
                 },
-                required: ['id', 'username', 'roles', 'offices', 'primary_office']
+                required: ['id', 'username', 'roles', 'offices', 'primary_office'],
               },
               constraints: {
                 type: 'object',
                 additionalProperties: true,
-                example: {}
+                example: {},
               },
               context: {
                 type: 'object',
                 additionalProperties: true,
-                example: {}
+                example: {},
               },
               timestamp: {
                 type: 'string',
                 format: 'date-time',
-                example: '2025-09-29T10:00:00.000Z'
-              }
+                example: '2025-09-29T10:00:00.000Z',
+              },
             },
-            required: ['policy', 'user', 'constraints', 'context', 'timestamp']
-          }
-        }
+            required: ['policy', 'user', 'constraints', 'context', 'timestamp'],
+          },
+        },
       },
       tags: [
         {
           name: 'Health',
-          description: 'Health check endpoints'
+          description: 'Health check endpoints',
         },
         {
           name: 'Proxy',
-          description: 'CWMS Data API proxy endpoints'
-        }
-      ]
-    }
+          description: 'CWMS Data API proxy endpoints',
+        },
+      ],
+    },
   });
 
   // Temporarily disabled due to ESM compatibility issues with swagger-ui

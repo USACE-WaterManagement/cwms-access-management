@@ -1,4 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+
 import { AuthorizationContext, User } from '../types/authorization';
 import { OPAService } from '../services/opa.service';
 import { getConfig } from '../config';
@@ -25,10 +26,13 @@ export class AuthorizationMiddleware {
       this.whitelistedEndpoints = [];
     }
 
-    this.fastify.log.info({
-      whitelistedEndpoints: this.whitelistedEndpoints,
-      count: this.whitelistedEndpoints.length
-    }, 'OPA authorization whitelist configured');
+    this.fastify.log.info(
+      {
+        whitelistedEndpoints: this.whitelistedEndpoints,
+        count: this.whitelistedEndpoints.length,
+      },
+      'OPA authorization whitelist configured',
+    );
   }
 
   /**
@@ -43,10 +47,7 @@ export class AuthorizationMiddleware {
     return this.whitelistedEndpoints.includes(cleanPath);
   }
 
-  async authorize(
-    request: FastifyRequest,
-    reply: FastifyReply
-  ): Promise<void> {
+  async authorize(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       // Extract user from request (mock for now, will integrate with Keycloak later)
       const user = this.extractUser(request);
@@ -60,40 +61,46 @@ export class AuthorizationMiddleware {
         path: request.url,
         query: request.query as Record<string, any>,
         headers: request.headers as Record<string, string>,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       // Check with OPA
       const decision = await this.opaService.authorize(context);
 
       if (!decision.allow) {
-        this.fastify.log.warn({
-          user: user.username,
-          resource: context.resource,
-          action: context.action,
-          reason: decision.reason
-        }, 'Authorization denied');
+        this.fastify.log.warn(
+          {
+            user: user.username,
+            resource: context.resource,
+            action: context.action,
+            reason: decision.reason,
+          },
+          'Authorization denied',
+        );
 
         reply.code(403).send({
           error: 'Forbidden',
-          message: decision.reason || 'You do not have permission to access this resource'
+          message: decision.reason || 'You do not have permission to access this resource',
         });
+
         return;
       }
 
       // Add authorization headers for the downstream API
       this.addAuthorizationHeaders(request, user, decision);
 
-      this.fastify.log.debug({
-        user: user.username,
-        authContext: JSON.parse(request.headers['x-cwms-auth-context'] as string)
-      }, 'Authorization successful, context header added');
-
+      this.fastify.log.debug(
+        {
+          user: user.username,
+          authContext: JSON.parse(request.headers['x-cwms-auth-context'] as string),
+        },
+        'Authorization successful, context header added',
+      );
     } catch (error) {
       this.fastify.log.error({ error }, 'Authorization middleware error');
       reply.code(500).send({
         error: 'Internal Server Error',
-        message: 'Authorization processing failed'
+        message: 'Authorization processing failed',
       });
     }
   }
@@ -106,12 +113,13 @@ export class AuthorizationMiddleware {
     if (headers['x-test-user']) {
       try {
         const testUser = JSON.parse(headers['x-test-user'] as string);
+
         return {
           id: testUser.id || 'test-user',
           username: testUser.username || 'test-user',
           email: testUser.email,
           roles: testUser.roles || [],
-          offices: testUser.offices || []
+          offices: testUser.offices || [],
         };
       } catch {
         this.fastify.log.warn('Invalid x-test-user header');
@@ -124,7 +132,7 @@ export class AuthorizationMiddleware {
       username: 'default-user',
       email: 'user@example.com',
       roles: ['viewer'],
-      offices: ['HQ']
+      offices: ['HQ'],
     };
   }
 
@@ -143,26 +151,22 @@ export class AuthorizationMiddleware {
   private extractAction(request: FastifyRequest): string {
     // Map HTTP method to action
     const methodToAction: Record<string, string> = {
-      'GET': 'read',
-      'POST': 'create',
-      'PUT': 'update',
-      'PATCH': 'update',
-      'DELETE': 'delete'
+      GET: 'read',
+      POST: 'create',
+      PUT: 'update',
+      PATCH: 'update',
+      DELETE: 'delete',
     };
 
     return methodToAction[request.method] || 'unknown';
   }
 
-  private addAuthorizationHeaders(
-    request: FastifyRequest,
-    user: User,
-    decision: any
-  ): void {
+  private addAuthorizationHeaders(request: FastifyRequest, user: User, decision: any): void {
     // Build the authorization context object per the latest specification
     const authContext = {
       policy: {
         allow: decision.allow,
-        decision_id: decision.decision_id || `proxy-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        decision_id: decision.decision_id || `proxy-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       },
       user: {
         id: user.id,
@@ -170,11 +174,11 @@ export class AuthorizationMiddleware {
         email: user.email,
         roles: user.roles,
         offices: user.offices,
-        primary_office: user.offices?.[0] || 'HQ'
+        primary_office: user.offices?.[0] || 'HQ',
       },
       constraints: decision.filters || {},
       context: decision.context || {},
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     // Set the single authorization context header as JSON string

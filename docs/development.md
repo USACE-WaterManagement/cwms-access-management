@@ -98,6 +98,113 @@ podman logs -f authorizer-proxy
 
 See [container-operations.md](container-operations.md) for more container commands.
 
+## Management Applications
+
+### Management UI (Web Application)
+
+The management UI provides a web-based interface for viewing users, roles, and policies.
+
+```bash
+# Run in development mode (hot reload)
+pnpm nx serve management-ui
+
+# The UI will start on http://localhost:4200
+# Changes to React components will hot reload automatically
+```
+
+**Build for production:**
+```bash
+# Build optimized production bundle
+pnpm nx build management-ui --configuration=production
+
+# Output: dist/apps/web/management-ui
+```
+
+**Run in container:**
+```bash
+# Build and start container
+podman compose -f docker-compose.podman.yml up -d management-ui
+
+# View logs
+podman logs -f management-ui
+
+# Access at http://localhost:4200
+```
+
+**Testing:**
+```bash
+# Run tests
+pnpm nx test management-ui
+
+# Run tests with coverage
+pnpm nx test management-ui --coverage
+
+# Run tests with UI
+pnpm nx test management-ui --ui
+```
+
+**Linting and type checking:**
+```bash
+# Lint
+pnpm nx lint management-ui
+
+# Type check
+pnpm nx typecheck management-ui
+```
+
+### Management CLI (Command-Line Tool)
+
+The management CLI provides command-line access for administration tasks.
+
+```bash
+# Run in development mode
+pnpm nx serve management-cli
+
+# Or run directly with tsx
+cd apps/cli/management-cli
+pnpm dev
+```
+
+**Build for production:**
+```bash
+# Build executable
+pnpm nx build management-cli --configuration=production
+
+# Output: dist/apps/cli/management-cli/index.cjs
+```
+
+**Run built executable:**
+```bash
+# Make executable
+chmod +x dist/apps/cli/management-cli/index.cjs
+
+# Run commands
+./dist/apps/cli/management-cli/index.cjs --help
+./dist/apps/cli/management-cli/index.cjs users list
+./dist/apps/cli/management-cli/index.cjs users show <username>
+./dist/apps/cli/management-cli/index.cjs roles list
+./dist/apps/cli/management-cli/index.cjs policies list
+```
+
+**Testing:**
+```bash
+# Run tests
+pnpm nx test management-cli
+
+# Run tests with coverage
+pnpm nx test management-cli --coverage
+```
+
+**Install globally (optional):**
+```bash
+# Link for local development
+cd dist/apps/cli/management-cli
+npm link
+
+# Now run from anywhere
+cwms-admin users list
+```
+
 ## Development Workflow
 
 ### Making Code Changes
@@ -126,23 +233,25 @@ pnpm nx format
 pnpm nx build authorizer-proxy
 ```
 
-### Building the Application
+### Building Applications
 
-The application must be built before running in containers:
+All applications must be built before running in containers:
 
 ```bash
-# Build the proxy service
+# Build specific applications
 pnpm nx build authorizer-proxy
+pnpm nx build management-ui --configuration=production
+pnpm nx build management-cli --configuration=production
+
+# Build all applications
+pnpm nx run-many --target=build --all
 
 # Build with production optimizations
 pnpm nx build authorizer-proxy --configuration=production
 
-# Build all projects
-pnpm nx run-many --target=build --all
-
 # Clean build (remove dist folder)
 rm -rf dist
-pnpm nx build authorizer-proxy
+pnpm nx run-many --target=build --all
 ```
 
 **Note**: The Docker/Podman build process runs `pnpm nx build` automatically during image creation.
@@ -150,14 +259,21 @@ pnpm nx build authorizer-proxy
 ### Running Tests
 
 ```bash
-# Run unit tests
+# Run tests for specific applications
 pnpm nx test authorizer-proxy
+pnpm nx test management-ui
+pnpm nx test management-cli
 
 # Run tests in watch mode
 pnpm nx test authorizer-proxy --watch
+pnpm nx test management-ui --watch
 
 # Run tests with coverage
 pnpm nx test authorizer-proxy --coverage
+pnpm nx test management-ui --coverage
+
+# Run tests with UI (Vitest UI for web apps)
+pnpm nx test management-ui --ui
 
 # Run all tests in workspace
 pnpm nx run-many --target=test --all
@@ -166,11 +282,14 @@ pnpm nx run-many --target=test --all
 ### Linting and Formatting
 
 ```bash
-# Lint code
+# Lint specific applications
 pnpm nx lint authorizer-proxy
+pnpm nx lint management-ui
+pnpm nx lint management-cli
 
 # Lint and fix
 pnpm nx lint authorizer-proxy --fix
+pnpm nx lint management-ui --fix
 
 # Format code
 pnpm nx format
@@ -180,6 +299,11 @@ pnpm nx format:check
 
 # Lint all projects
 pnpm nx run-many --target=lint --all
+
+# Type check all applications
+pnpm nx typecheck authorizer-proxy
+pnpm nx typecheck management-ui
+pnpm nx typecheck management-cli
 ```
 
 ## Development Tools

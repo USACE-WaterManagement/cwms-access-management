@@ -9,17 +9,17 @@ The CWMS Access Management system provides transparent authorization for CWMS Da
 ## Quick Start
 
 ```bash
-# 1. Install dependencies
+# Install dependencies
 pnpm install
 
-# 2. Configure environment
+# Configure environment
 cp .env.example .env
 ./scripts/load-whitelist.sh
 
-# 3. Start services
+# Start services
 podman compose -f docker-compose.podman.yml up -d
 
-# 4. Verify it's working
+# Verify it's working
 curl http://localhost:3001/health
 curl http://localhost:3001/cwms-data/offices
 ```
@@ -28,70 +28,47 @@ curl http://localhost:3001/cwms-data/offices
 
 ## Architecture
 
-```
-Client → Authorization Proxy (3001) → OPA (8181) → Policy Decision
-                ↓
-         CWMS Data API (7001)
+```mermaid
+flowchart LR
+    UI[Management UI<br/>Port 4200]
+    CLI[Management CLI]
+    Proxy[Authorization Proxy<br/>Port 3001]
+    OPA[OPA<br/>Port 8181]
+    API[CWMS Data API<br/>Port 7001]
+
+    UI --> Proxy
+    CLI --> Proxy
+    Proxy --> OPA
+    OPA -->|Policy Decision| Proxy
+    Proxy --> API
 ```
 
 ### Key Components
 
 | Component | Port | Description |
 |-----------|------|-------------|
+| **Management UI** | 4200 | Web interface for viewing users, roles, and policies |
+| **Management CLI** | - | Command-line tool for administration tasks |
 | **Authorization Proxy** | 3001 | Transparent proxy that intercepts and authorizes requests |
 | **OPA** | 8181 | Policy engine for authorization decisions |
 | **Redis** | 6379 | Caches authorization decisions for performance |
 | **CWMS Data API** | 7001 | Downstream API being protected |
 
-### Authorization Flow
+## Management Applications
 
-1. Client sends request to authorization proxy
-2. Proxy determines if endpoint requires OPA authorization (whitelist check)
-3. For whitelisted endpoints: queries OPA for authorization decision
-4. If allowed: adds `x-cwms-auth-context` header with complete authorization context
-5. Request forwarded to CWMS Data API
-6. API response returned to client unchanged
+### Management UI
+Web-based interface for viewing authorization policies, users, and roles.
 
-### Whitelist Pattern
+- **Access**: [http://localhost:4200](http://localhost:4200)
+- **Tech Stack**: React 18 + Vite + TypeScript + Tailwind CSS
+- **Documentation**: [apps/web/management-ui/README.md](apps/web/management-ui/README.md)
 
-Only endpoints in the OPA whitelist require authorization. Others are transparently proxied without OPA evaluation.
+### Management CLI
+Command-line tool for managing authorization policies, users, and roles.
 
-Configure whitelist in `opa-whitelist.json`:
-```json
-[
-  "/cwms-data/timeseries",
-  "/cwms-data/offices",
-  "/cwms-data/locations"
-]
-```
-
-Load configuration: `./scripts/load-whitelist.sh`
-
-## Authorization Context Header
-
-All authorization data is passed in a single `x-cwms-auth-context` header:
-
-```json
-{
-  "policy": {
-    "allow": true,
-    "decision_id": "proxy-1234567890-abc"
-  },
-  "user": {
-    "id": "user123",
-    "username": "jdoe",
-    "email": "jdoe@example.com",
-    "roles": ["water_manager"],
-    "offices": ["SPK", "SWT"],
-    "primary_office": "SPK"
-  },
-  "constraints": {},
-  "context": {},
-  "timestamp": "2025-09-29T08:00:00.000Z"
-}
-```
-
-The CWMS Data API receives this header and can use it for database context or logging. The Java API does not perform authorization - only the authorization proxy makes authorization decisions via OPA.
+- **Executable**: `./dist/apps/cli/management-cli/index.cjs`
+- **Tech Stack**: Node.js 24 + TypeScript + Commander + Ink
+- **Documentation**: [apps/cli/management-cli/README.md](apps/cli/management-cli/README.md)
 
 ## Documentation
 
@@ -99,36 +76,32 @@ The CWMS Data API receives this header and can use it for database context or lo
 
 - [Setup Guide](docs/setup.md) - First-time setup and prerequisites
 - [Development Guide](docs/development.md) - Local development workflow
-- [Container Operations](docs/container-operations.md) - Docker/Podman commands
+- [Container Operations](docs/container-operations.md) - Docker/Podman commands reference
 - [Troubleshooting](docs/troubleshooting.md) - Common issues and solutions
-- [Performance Optimization](docs/performance.md) - Performance tuning and monitoring
+- [Performance](docs/performance.md) - Performance tuning and monitoring
 
 ### Service Documentation
 
 - [Configuration Guide](apps/services/authorizer-proxy/docs/configuration.md) - Environment variables and settings
 - [OPA Whitelist Guide](apps/services/authorizer-proxy/docs/opa-whitelist-guide.md) - Whitelist pattern and endpoint configuration
-- [Authentication Integration](apps/services/authorizer-proxy/docs/authentication.md) - JWT and Keycloak integration
+- [Authentication](apps/services/authorizer-proxy/docs/authentication.md) - JWT and Keycloak integration
 
 ## Project Structure
 
 ```
 cwms-access-management/
 ├── apps/
+│   ├── web/
+│   │   └── management-ui/         # Web-based management interface
+│   ├── cli/
+│   │   └── management-cli/        # Command-line management tool
 │   └── services/
-│       └── authorizer-proxy/       # Transparent authorization proxy
-│           ├── src/                # Source code
-│           ├── docs/               # Service-specific documentation
-│           ├── Dockerfile          # Production image
-│           └── Dockerfile.dev      # Development image
+│       └── authorizer-proxy/      # Transparent authorization proxy
 ├── policies/
 │   └── cwms_authz.rego            # OPA authorization policies
 ├── scripts/
 │   └── load-whitelist.sh          # Load whitelist configuration
 ├── docs/                           # Project documentation
-│   ├── setup.md                   # Setup guide
-│   ├── development.md             # Development guide
-│   ├── container-operations.md    # Container operations
-│   └── troubleshooting.md         # Troubleshooting guide
 ├── tools/
 │   └── postman/                   # Postman test collections
 ├── .env.example                    # Environment template
@@ -136,120 +109,62 @@ cwms-access-management/
 └── docker-compose.podman.yml      # Container orchestration
 ```
 
-## Common Commands
-
-### Development
-
-```bash
-# Run locally with hot reload
-pnpm dev
-
-# Run tests
-pnpm nx test authorizer-proxy
-
-# Lint and format
-pnpm nx lint authorizer-proxy
-pnpm nx format
-
-# Build
-pnpm nx build authorizer-proxy
-```
-
-### Container Operations
-
-```bash
-# Start services
-podman compose -f docker-compose.podman.yml up -d
-
-# View logs
-podman logs -f authorizer-proxy
-
-# Restart after configuration changes
-podman compose -f docker-compose.podman.yml down authorizer-proxy
-podman compose -f docker-compose.podman.yml up -d authorizer-proxy
-
-# Stop all services
-podman compose -f docker-compose.podman.yml down
-```
-
-### Testing
-
-```bash
-# Health check
-curl http://localhost:3001/health
-
-# Test endpoint (public)
-curl http://localhost:3001/cwms-data/offices
-
-# Test with custom user context
-curl http://localhost:3001/cwms-data/offices \
-  -H 'x-test-user: {"id":"test","username":"testuser","roles":["water_manager"],"offices":["SPK"]}'
-
-# Get JWT token from Keycloak
-curl -X POST http://localhost:8080/auth/realms/cwms/protocol/openid-connect/token \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "username=m5hectest" \
-  -d "password=m5hectest" \
-  -d "grant_type=password" \
-  -d "client_id=cwms" \
-  | jq -r '.access_token'
-```
-
-## Testing Resources
-
-- **Postman Collection**: [tools/postman/cwms-authorization.postman_collection.json](tools/postman/cwms-authorization.postman_collection.json)
-  - Health checks
-  - JWT token retrieval
-  - Whitelisted vs non-whitelisted endpoints
-  - Direct OPA policy testing
-
-## Environment Variables
-
-Key configuration in `.env`:
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NODE_ENV` | Environment mode | `development` |
-| `PORT` | Proxy server port | `3001` |
-| `LOG_LEVEL` | Logging verbosity | `info` |
-| `CWMS_API_URL` | Downstream API URL | `http://data-api:7000/cwms-data` |
-| `OPA_URL` | OPA service URL | `http://opa:8181` |
-| `REDIS_URL` | Redis connection string | `redis://redis:6379` |
-| `BYPASS_AUTH` | Skip authorization (dev only) | `false` |
-| `OPA_WHITELIST_ENDPOINTS` | Endpoints requiring OPA | JSON array |
-
-See [configuration.md](apps/services/authorizer-proxy/docs/configuration.md) for complete documentation.
-
 ## Prerequisites
 
 - **Node.js 24+**
 - **pnpm 10.15.1+**
 - **Podman or Docker**
-- **Running CWMS infrastructure:**
-  - CWMS Data API (port 7001)
-  - Keycloak (port 8080)
-  - Oracle Database (port 1521)
-  - Traefik (port 8081)
+- **CWMS Infrastructure** - Complete the setup from the [cwms-data-api repository](https://github.com/HydrologicEngineeringCenter/cwms-data-api) first:
+  - Oracle Database (cwmsdb) running on port 1521
+  - CWMS Data API (data-api) running on port 7001
+  - Keycloak (auth) running on port 8080
+  - Traefik (traefik) running on port 8081
+
+**Note**: The authorization proxy requires a running CWMS Data API instance. Set up the cwms-data-api project before proceeding.
 
 **Recommended**: Use [mise](https://mise.jdx.dev/) to manage tool versions:
 ```bash
 mise install  # Installs Node 24 and pnpm 10.15.1
 ```
 
+## Quick Commands
+
+```bash
+# Development
+pnpm dev                                    # Run authorization proxy with hot reload
+pnpm nx serve management-ui                 # Run management UI
+pnpm nx serve management-cli                # Run management CLI
+
+# Build
+pnpm nx build authorizer-proxy
+pnpm nx build management-ui --configuration=production
+pnpm nx build management-cli --configuration=production
+
+# Test
+pnpm nx test authorizer-proxy
+pnpm nx test management-ui
+
+# Containers
+podman compose -f docker-compose.podman.yml up -d    # Start all services
+podman logs -f authorizer-proxy                      # View logs
+podman compose -f docker-compose.podman.yml down     # Stop all services
+```
+
+See the [development guide](docs/development.md) for complete command reference.
+
 ## Next Steps
 
 1. Complete [first-time setup](docs/setup.md)
 2. Review the [development guide](docs/development.md)
 3. Read about [OPA whitelist configuration](apps/services/authorizer-proxy/docs/opa-whitelist-guide.md)
-4. Learn about [performance optimization](docs/performance.md)
+4. Explore [management applications](apps/web/management-ui/README.md)
 
 ## Support
 
 For issues and troubleshooting:
 1. Check the [troubleshooting guide](docs/troubleshooting.md)
 2. Review container logs: `podman logs authorizer-proxy`
-3. Verify configuration: `cat .env | grep OPA_WHITELIST`
-4. Test services individually: See [troubleshooting guide](docs/troubleshooting.md)
+3. Verify configuration: `cat .env`
 
 ## License
 

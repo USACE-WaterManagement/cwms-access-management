@@ -1,6 +1,7 @@
 import fastifyCors from '@fastify/cors';
 import fastifyHttpProxy from '@fastify/http-proxy';
 import Fastify from 'fastify';
+
 import { getConfig, registerConfig } from './config';
 import { AuthorizationMiddleware } from './middleware/authorization';
 import { registerSwagger } from './plugins/swagger';
@@ -9,12 +10,12 @@ async function buildServer() {
   // Create Fastify instance with built-in logger
   const fastify = Fastify({
     logger: {
-      level: process.env.LOG_LEVEL || 'info'
+      level: process.env.LOG_LEVEL || 'info',
     },
     requestIdHeader: 'x-request-id',
     requestIdLogLabel: 'requestId',
     disableRequestLogging: false,
-    trustProxy: true
+    trustProxy: true,
   });
 
   // Register configuration
@@ -28,7 +29,7 @@ async function buildServer() {
   await fastify.register(fastifyCors, {
     origin: true, // Allow all origins for now, configure as needed
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   });
 
   // Create authorization middleware instance
@@ -39,7 +40,7 @@ async function buildServer() {
     return {
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      service: 'authorizer-proxy'
+      service: 'authorizer-proxy',
     };
   });
 
@@ -49,19 +50,19 @@ async function buildServer() {
     try {
       const response = await fetch(`${config.CWMS_API_URL}/`, {
         method: 'HEAD',
-        signal: AbortSignal.timeout(5000)
+        signal: AbortSignal.timeout(5000),
       });
 
       return {
         status: 'ready',
         downstream: response.ok ? 'available' : 'unavailable',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch {
       return {
         status: 'not-ready',
         downstream: 'unavailable',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   });
@@ -85,27 +86,37 @@ async function buildServer() {
 
       // Check if endpoint requires OPA authorization (whitelist pattern)
       if (!authMiddleware.isWhitelisted(request.url)) {
-        fastify.log.debug({
-          url: request.url,
-          method: request.method
-        }, 'Endpoint not in OPA whitelist - bypassing authorization');
+        fastify.log.debug(
+          {
+            url: request.url,
+            method: request.method,
+          },
+          'Endpoint not in OPA whitelist - bypassing authorization',
+        );
+
         return;
       }
 
       // Run authorization middleware for whitelisted endpoints
-      fastify.log.debug({
-        url: request.url,
-        method: request.method
-      }, 'Endpoint in OPA whitelist - running authorization');
+      fastify.log.debug(
+        {
+          url: request.url,
+          method: request.method,
+        },
+        'Endpoint in OPA whitelist - running authorization',
+      );
 
       await authMiddleware.authorize(request, reply);
 
       // Log the request being proxied
-      fastify.log.debug({
-        method: request.method,
-        url: request.url,
-        headers: request.headers
-      }, 'Proxying request to CWMS API');
+      fastify.log.debug(
+        {
+          method: request.method,
+          url: request.url,
+          headers: request.headers,
+        },
+        'Proxying request to CWMS API',
+      );
     },
 
     // Reply options
@@ -114,10 +125,10 @@ async function buildServer() {
         fastify.log.error({ error }, 'Proxy error occurred');
         reply.code(502).send({
           error: 'Bad Gateway',
-          message: 'Unable to reach downstream service'
+          message: 'Unable to reach downstream service',
         });
-      }
-    }
+      },
+    },
   });
 
   // Catch-all route for non-cwms-data paths (exclude OPTIONS handled by CORS)
@@ -127,9 +138,9 @@ async function buildServer() {
     handler: async (request, reply) => {
       reply.code(404).send({
         error: 'Not Found',
-        message: 'This proxy only handles /cwms-data/* routes'
+        message: 'This proxy only handles /cwms-data/* routes',
       });
-    }
+    },
   });
 
   // Error handler
@@ -138,7 +149,7 @@ async function buildServer() {
 
     reply.code(error.statusCode || 500).send({
       error: error.name || 'Internal Server Error',
-      message: error.message || 'An unexpected error occurred'
+      message: error.message || 'An unexpected error occurred',
     });
   });
 
@@ -152,7 +163,7 @@ async function start() {
 
     await fastify.listen({
       port: parseInt(config.PORT),
-      host: config.HOST
+      host: config.HOST,
     });
 
     fastify.log.info(`Authorizer Proxy started on ${config.HOST}:${config.PORT}`);
@@ -161,7 +172,6 @@ async function start() {
     if (config.BYPASS_AUTH === 'true') {
       fastify.log.warn('BYPASS_AUTH is enabled - authorization checks may be skipped!');
     }
-
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);

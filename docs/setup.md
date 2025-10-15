@@ -9,11 +9,13 @@ Before you begin, ensure you have:
 - **Node.js 24+**
 - **pnpm 10.15.1+**
 - **Podman or Docker**
-- **Running CWMS infrastructure:**
-  - CWMS Data API (port 7001 external, 7000 internal)
-  - Keycloak (port 8080)
-  - Oracle Database (port 1521)
-  - Traefik (port 8081)
+- **CWMS Infrastructure Setup Complete** - You must first complete the setup from the [cwms-data-api repository](https://github.com/HydrologicEngineeringCenter/cwms-data-api). This includes:
+  - Oracle Database container (cwmsdb) running on port 1521
+  - CWMS Data API container (data-api) running on port 7001
+  - Keycloak container (auth) running on port 8080
+  - Traefik container (traefik) running on port 8081
+
+**IMPORTANT**: If you haven't set up the cwms-data-api project yet, do that first before proceeding with this authorization proxy setup. Follow the instructions in the cwms-data-api repository's README to get the database and API containers running.
 
 ### Tool Installation
 

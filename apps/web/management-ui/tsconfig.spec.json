@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": true,
+    "types": ["vitest/globals", "vitest/jsdom"]
+  },
+  "include": ["test/**/*.ts", "test/**/*.tsx"]
+}

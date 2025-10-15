@@ -8,49 +8,49 @@ const schema = {
   properties: {
     PORT: {
       type: 'string',
-      default: '3001'
+      default: '3001',
     },
     HOST: {
       type: 'string',
-      default: '0.0.0.0'
+      default: '0.0.0.0',
     },
     LOG_LEVEL: {
       type: 'string',
-      default: 'info'
+      default: 'info',
     },
     CWMS_API_URL: {
       type: 'string',
-      default: 'http://localhost:7001/cwms-data'
+      default: 'http://localhost:7001/cwms-data',
     },
     CWMS_API_TIMEOUT: {
       type: 'string',
-      default: '30000'
+      default: '30000',
     },
     OPA_URL: {
       type: 'string',
-      default: 'http://localhost:8181'
+      default: 'http://localhost:8181',
     },
     OPA_POLICY_PATH: {
       type: 'string',
-      default: '/v1/data/cwms/authorize'
+      default: '/v1/data/cwms/authorize',
     },
     BYPASS_AUTH: {
       type: 'string',
-      default: 'false'
+      default: 'false',
     },
     CACHE_TTL_SECONDS: {
       type: 'string',
-      default: '300'
+      default: '300',
     },
     CACHE_MAX_SIZE: {
       type: 'string',
-      default: '1000'
+      default: '1000',
     },
     OPA_WHITELIST_ENDPOINTS: {
       type: 'string',
-      default: '["/cwms-data/timeseries","/cwms-data/offices"]'
-    }
-  }
+      default: '["/cwms-data/timeseries","/cwms-data/offices"]',
+    },
+  },
 };
 
 export interface Config {
@@ -70,7 +70,7 @@ export interface Config {
 export async function registerConfig(fastify: FastifyInstance): Promise<void> {
   await fastify.register(fastifyEnv, {
     schema,
-    dotenv: true // Use fastify's built-in dotenv support
+    dotenv: true, // Use fastify's built-in dotenv support
   });
 }
 

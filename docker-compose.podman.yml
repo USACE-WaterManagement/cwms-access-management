@@ -1,4 +1,58 @@
 services:
+  # Management UI Service
+  management-ui:
+    container_name: management-ui
+    build:
+      context: .
+      dockerfile: apps/web/management-ui/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3002}
+    image: cwms-management-ui:local-dev
+    ports:
+      - "${MANAGEMENT_UI_PORT:-4200}:80"
+    depends_on:
+      - management-api
+    networks:
+      - cwmsdb_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Management API Service
+  management-api:
+    container_name: management-api
+    build:
+      context: .
+      dockerfile: apps/services/management-api/Dockerfile
+    image: cwms-management-api:local-dev
+    ports:
+      - "${MANAGEMENT_API_PORT:-3002}:3002"
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      NODE_OPTIONS: --no-deprecation
+      MANAGEMENT_API_PORT: ${MANAGEMENT_API_PORT:-3002}
+      MANAGEMENT_API_HOST: ${MANAGEMENT_API_HOST:-0.0.0.0}
+      KEYCLOAK_URL: ${KEYCLOAK_URL:-http://auth:8080/auth}
+      KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      OPA_URL: ${OPA_URL:-http://opa:8181}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      - opa
+    networks:
+      - cwmsdb_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
   # Authorization Proxy Service
   authorizer-proxy:
     container_name: authorizer-proxy

@@ -6,6 +6,9 @@ import globals from 'globals';
 import tsEslint from 'typescript-eslint';
 
 export default [
+  {
+    ignores: ['**/postcss.config.js', '**/tailwind.config.js'],
+  },
   js.configs.recommended,
   ...tsEslint.configs.recommended,
   {

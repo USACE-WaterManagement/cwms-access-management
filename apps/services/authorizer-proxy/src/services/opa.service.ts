@@ -1,11 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import { FastifyInstance } from 'fastify';
-import {
-  AuthorizationContext,
-  AuthorizationDecision,
-  OPARequest,
-  OPAResponse
-} from '../types/authorization';
+
+import { AuthorizationContext, AuthorizationDecision, OPARequest, OPAResponse } from '../types/authorization';
 import { getConfig } from '../config';
 
 export class OPAService {
@@ -21,8 +17,8 @@ export class OPAService {
       baseURL: config.OPA_URL,
       timeout: 5000,
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
 
     this.policyPath = config.OPA_POLICY_PATH;
@@ -40,6 +36,7 @@ export class OPAService {
     const cached = this.cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.cacheTTL) {
       this.fastify.log.debug({ cacheKey }, 'Using cached authorization decision');
+
       return cached.decision;
     }
 
@@ -54,43 +51,42 @@ export class OPAService {
             method: context.method,
             path: context.path,
             query: context.query || {},
-            timestamp: context.timestamp.toISOString()
-          }
-        }
+            timestamp: context.timestamp.toISOString(),
+          },
+        },
       };
 
       this.fastify.log.debug({ opaRequest }, 'Sending request to OPA');
 
       // Call OPA
-      const response = await this.client.post<OPAResponse>(
-        this.policyPath,
-        opaRequest
-      );
+      const response = await this.client.post<OPAResponse>(this.policyPath, opaRequest);
 
       // OPA returns result as boolean directly or as an object with allow property
       const result = response.data.result;
       const decision: AuthorizationDecision = {
-        allow: typeof result === 'boolean' ? result : (result?.allow || false),
+        allow: typeof result === 'boolean' ? result : result?.allow || false,
         reason: typeof result === 'object' ? result?.reason : undefined,
         filters: typeof result === 'object' ? result?.filters : undefined,
-        context: typeof result === 'object' ? result?.headers : undefined
+        context: typeof result === 'object' ? result?.headers : undefined,
       };
 
       // Cache the decision
       this.cache.set(cacheKey, {
         decision,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
-      this.fastify.log.info({
-        user: context.user.username,
-        resource: context.resource,
-        action: context.action,
-        allow: decision.allow
-      }, 'Authorization decision made');
+      this.fastify.log.info(
+        {
+          user: context.user.username,
+          resource: context.resource,
+          action: context.action,
+          allow: decision.allow,
+        },
+        'Authorization decision made',
+      );
 
       return decision;
-
     } catch (error) {
       this.fastify.log.error({ error, context }, 'OPA authorization failed');
 
@@ -101,12 +97,13 @@ export class OPAService {
 
       if (config.BYPASS_AUTH === 'true') {
         this.fastify.log.warn('Bypassing authorization due to OPA failure and BYPASS_AUTH=true');
+
         return { allow: true, reason: 'OPA unavailable, bypassed' };
       }
 
       return {
         allow: false,
-        reason: 'Authorization service unavailable'
+        reason: 'Authorization service unavailable',
       };
     }
   }
@@ -137,7 +134,7 @@ export class OPAService {
 
     // Simple mock rules for testing
     const publicPaths = ['/health', '/metrics', '/offices'];
-    const isPublic = publicPaths.some(path => context.path.includes(path));
+    const isPublic = publicPaths.some((path) => context.path.includes(path));
 
     if (isPublic) {
       return { allow: true, reason: 'Public endpoint' };
@@ -153,12 +150,14 @@ export class OPAService {
       return {
         allow: true,
         reason: 'User has office access',
-        filters: [{
-          type: 'office',
-          field: 'office_id',
-          operator: 'in',
-          value: context.user.offices
-        }]
+        filters: [
+          {
+            type: 'office',
+            field: 'office_id',
+            operator: 'in',
+            value: context.user.offices,
+          },
+        ],
       };
     }
 

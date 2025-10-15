@@ -1,0 +1,80 @@
+{
+  "name": "management-api",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/services/management-api",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/{projectRoot}",
+        "main": "{projectRoot}/src/index.ts",
+        "tsConfig": "{projectRoot}/tsconfig.app.json",
+        "platform": "node",
+        "bundle": true,
+        "thirdParty": true,
+        "format": [
+          "esm"
+        ],
+        "watch": false,
+        "esbuildOptions": {
+          "banner": {
+            "js": "import { createRequire } from 'module'; const require = createRequire(import.meta.url);"
+          }
+        }
+      },
+      "configurations": {
+        "development": {
+          "watch": true
+        },
+        "production": {
+          "watch": false
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "options": {
+        "buildTarget": "management-api:build",
+        "watch": true,
+        "inspect": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "management-api:build:development"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "{projectRoot}/**/*.ts"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "options": {
+        "jestConfig": "{projectRoot}/jest.config.ts"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "tsc -b --noEmit ."
+      }
+    }
+  },
+  "tags": []
+}
