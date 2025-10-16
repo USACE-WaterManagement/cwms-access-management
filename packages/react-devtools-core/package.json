@@ -1,0 +1,11 @@
+{
+  "name": "react-devtools-core",
+  "version": "4.28.0",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": {
+      "default": "./index.js"
+    }
+  }
+}

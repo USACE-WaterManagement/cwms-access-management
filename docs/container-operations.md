@@ -5,6 +5,7 @@ This guide covers Docker/Podman operations for building, running, and managing t
 ## Overview
 
 The cwms-access-management project uses containers for:
+
 - **authorizer-proxy**: Authorization proxy service
 - **opa**: Open Policy Agent for policy decisions
 - **redis-cache**: Cache for authorization decisions
@@ -106,7 +107,8 @@ The Dockerfile uses multi-stage builds:
    - Uses non-root user
    - Includes health check
 
-**Important**: You don't need to run `pnpm build` manually before building the container. The Dockerfile handles the build process automatically.
+**Important**: You don't need to run `pnpm build` manually before building the container. The Dockerfile handles the
+build process automatically.
 
 ## Managing Containers
 
@@ -165,7 +167,8 @@ podman compose -f docker-compose.podman.yml down authorizer-proxy
 podman compose -f docker-compose.podman.yml up -d authorizer-proxy
 ```
 
-**Important**: Simply restarting a container won't pick up changes to `.env` file. You must recreate the container (down + up) to apply environment variable changes.
+**Important**: Simply restarting a container won't pick up changes to `.env` file. You must recreate the container
+(down + up) to apply environment variable changes.
 
 ### Stop Services
 
@@ -366,7 +369,8 @@ podman inspect --format='{{.State.Health}}' authorizer-proxy
 podman inspect --format='{{range .State.Health.Log}}{{.Output}}{{end}}' authorizer-proxy
 ```
 
-**Note**: If containers show "unhealthy" status but respond to curl commands, this is a known cosmetic issue with health check configuration. The services are working correctly.
+**Note**: If containers show "unhealthy" status but respond to curl commands, this is a known cosmetic issue with health
+check configuration. The services are working correctly.
 
 ### Service Health Endpoints
 

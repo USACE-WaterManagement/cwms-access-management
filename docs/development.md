@@ -49,12 +49,14 @@ pnpm dev
 ```
 
 **Advantages:**
+
 - Hot reload on file changes
 - Direct access to debugger
 - Faster iteration cycle
 - See logs directly in terminal
 
 **Requirements:**
+
 - OPA and Redis must still run in containers
 - CWMS Data API must be accessible
 
@@ -113,6 +115,7 @@ pnpm nx serve management-ui
 ```
 
 **Build for production:**
+
 ```bash
 # Build optimized production bundle
 pnpm nx build management-ui --configuration=production
@@ -121,6 +124,7 @@ pnpm nx build management-ui --configuration=production
 ```
 
 **Run in container:**
+
 ```bash
 # Build and start container
 podman compose -f docker-compose.podman.yml up -d management-ui
@@ -132,6 +136,7 @@ podman logs -f management-ui
 ```
 
 **Testing:**
+
 ```bash
 # Run tests
 pnpm nx test management-ui
@@ -144,6 +149,7 @@ pnpm nx test management-ui --ui
 ```
 
 **Linting and type checking:**
+
 ```bash
 # Lint
 pnpm nx lint management-ui
@@ -166,6 +172,7 @@ pnpm dev
 ```
 
 **Build for production:**
+
 ```bash
 # Build executable
 pnpm nx build management-cli --configuration=production
@@ -174,6 +181,7 @@ pnpm nx build management-cli --configuration=production
 ```
 
 **Run built executable:**
+
 ```bash
 # Make executable
 chmod +x dist/apps/cli/management-cli/index.cjs
@@ -187,6 +195,7 @@ chmod +x dist/apps/cli/management-cli/index.cjs
 ```
 
 **Testing:**
+
 ```bash
 # Run tests
 pnpm nx test management-cli
@@ -196,6 +205,7 @@ pnpm nx test management-cli --coverage
 ```
 
 **Install globally (optional):**
+
 ```bash
 # Link for local development
 cd dist/apps/cli/management-cli
@@ -410,7 +420,8 @@ pnpm nx run authorizer-proxy:generate:openapi
 # apps/services/authorizer-proxy/openapi.json
 ```
 
-**Note**: Interactive Swagger UI is temporarily disabled due to ESM compatibility issues. The OpenAPI JSON spec can be imported into tools like Postman or Insomnia.
+**Note**: Interactive Swagger UI is temporarily disabled due to ESM compatibility issues. The OpenAPI JSON spec can be
+imported into tools like Postman or Insomnia.
 
 ## Testing the Proxy
 

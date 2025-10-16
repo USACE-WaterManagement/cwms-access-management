@@ -2,11 +2,13 @@
 
 ## Overview
 
-The CWMS Authorization Proxy supports multiple authentication methods that integrate with the underlying CWMS Data API. This document explains how authentication works and how to configure it.
+The CWMS Authorization Proxy supports multiple authentication methods that integrate with the underlying CWMS Data API.
+This document explains how authentication works and how to configure it.
 
 ## Current Setup
 
 ### Development Mode (Default)
+
 In development, the proxy uses test user headers for easy testing without requiring full authentication setup:
 
 ```bash
@@ -20,6 +22,7 @@ curl http://localhost:3001/cwms-data/offices \
 The CWMS Data API supports three authentication methods that the proxy can pass through:
 
 #### 1. API Key Authentication
+
 ```bash
 # Use API key with the proxy
 curl http://localhost:3001/cwms-data/offices \
@@ -27,12 +30,14 @@ curl http://localhost:3001/cwms-data/offices \
 ```
 
 The proxy will:
+
 1. Pass the API key to CWMS Data API for validation
 2. Retrieve user details from the API response
 3. Make authorization decision via OPA
 4. Add x-cwms-auth-context header
 
 #### 2. JWT/OpenID Connect (Keycloak)
+
 ```bash
 # Use JWT token with the proxy
 curl http://localhost:3001/cwms-data/offices \
@@ -40,19 +45,21 @@ curl http://localhost:3001/cwms-data/offices \
 ```
 
 The proxy will:
+
 1. Validate JWT signature (when configured)
 2. Extract user claims from token
 3. Make authorization decision via OPA
 4. Add x-cwms-auth-context header
 
 #### 3. CWMS AAA (Session-based)
+
 Legacy session-based authentication using JSESSIONIDSSO cookies.
 
 ## Authorization Flow
 
 Regardless of authentication method, the authorization flow is:
 
-```
+```text
 Client Request → Proxy → Extract User → OPA Decision → Add Header → Forward to API
 ```
 
@@ -80,12 +87,14 @@ The proxy adds a single `x-cwms-auth-context` header containing:
 ## Environment Configuration
 
 ### Development (with test users)
+
 ```env
 BYPASS_AUTH=false
 ENABLE_TEST_USERS=true
 ```
 
 ### Production (with real authentication)
+
 ```env
 BYPASS_AUTH=false
 ENABLE_TEST_USERS=false
@@ -97,6 +106,7 @@ JWT_AUDIENCE=cwms
 ## CWMS Data API Authentication Setup
 
 ### API Key Management
+
 The CWMS Data API provides endpoints for managing API keys:
 
 - `GET /auth/keys` - List user's API keys
@@ -105,7 +115,9 @@ The CWMS Data API provides endpoints for managing API keys:
 - `DELETE /auth/keys/{key-name}` - Delete key
 
 ### Keycloak Configuration
+
 The CWMS Data API expects Keycloak at:
+
 - Well-known URL: `http://localhost:8080/auth/realms/cwms/.well-known/openid-configuration`
 - Realm: `cwms`
 - Client ID: `cwms`
@@ -136,31 +148,36 @@ curl http://localhost:3001/cwms-data/offices \
   -H "Authorization: Bearer <jwt-token>"
 ```
 
-**Note**: In current pass-through mode, the proxy forwards the JWT to the CWMS Data API for validation but still uses default user context for authorization decisions. Full JWT parsing will be implemented in the next phase.
+**Note**: In current pass-through mode, the proxy forwards the JWT to the CWMS Data API for validation but still uses
+default user context for authorization decisions. Full JWT parsing will be implemented in the next phase.
 
 ### Test Users (Keycloak & Database)
+
 Pre-configured test users with their permissions:
 
-| User | Password | Office | Permissions | Purpose |
-|------|----------|--------|-------------|---------|
-| `l2hectest.1234567890` | `l2hectest` | SPK | CWMS Users, TS ID Creator | General User with full permissions |
-| `l1hectest` | `l1hectest` | SPL | None (intentionally) | Test access denial scenarios |
-| `m5hectest` | `m5hectest` | SWT | CWMS Users, TS ID Creator | General User with full permissions |
-| `q0hecoidc` | `q0hecoidc` | N/A | Keycloak only | Test user creation workflow |
+| User                   | Password    | Office | Permissions               | Purpose                            |
+| ---------------------- | ----------- | ------ | ------------------------- | ---------------------------------- |
+| `l2hectest.1234567890` | `l2hectest` | SPK    | CWMS Users, TS ID Creator | General User with full permissions |
+| `l1hectest`            | `l1hectest` | SPL    | None (intentionally)      | Test access denial scenarios       |
+| `m5hectest`            | `m5hectest` | SWT    | CWMS Users, TS ID Creator | General User with full permissions |
+| `q0hecoidc`            | `q0hecoidc` | N/A    | Keycloak only             | Test user creation workflow        |
 
 ## Integration Strategies
 
 ### Option 1: Pass-through Authentication (Current)
+
 - Proxy forwards authentication headers unchanged
 - CWMS Data API validates credentials
 - Proxy adds authorization context based on authenticated user
 
 ### Option 2: Proxy-level Authentication (Future)
+
 - Proxy validates JWT tokens directly
 - Proxy manages API keys independently
 - No authentication forwarded to CWMS Data API
 
 ### Option 3: Hybrid Approach
+
 - Proxy validates JWT tokens
 - Falls back to API key validation by CWMS Data API
 - Supports gradual migration
@@ -168,7 +185,9 @@ Pre-configured test users with their permissions:
 ## Troubleshooting
 
 ### 401 Unauthorized from API
+
 This is expected if:
+
 - Database users aren't configured
 - Keycloak realm doesn't exist
 - API keys are invalid
@@ -176,13 +195,17 @@ This is expected if:
 The proxy authorization still works - check logs to see the x-cwms-auth-context header being added.
 
 ### No User Context
+
 If using production mode without test users:
+
 - Ensure valid authentication header is provided
 - Check JWT token hasn't expired
 - Verify API key is active
 
 ### Authorization Denied
+
 Even with valid authentication:
+
 - Check OPA policies match user roles
 - Verify user has required office permissions
 - Review authorization decision in logs
@@ -190,6 +213,7 @@ Even with valid authentication:
 ## Testing Authorization
 
 ### Verify Header Addition
+
 ```bash
 # Check proxy logs for authorization context
 podman logs authorizer-proxy | grep x-cwms-auth-context
@@ -199,6 +223,7 @@ curl -v http://localhost:3001/cwms-data/offices 2>&1 | grep x-cwms
 ```
 
 ### Test Different Personas
+
 ```bash
 # Dam Operator
 curl http://localhost:3001/cwms-data/timeseries \

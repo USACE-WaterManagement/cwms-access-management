@@ -13,10 +13,14 @@
         "tsConfig": "{projectRoot}/tsconfig.app.json",
         "platform": "node",
         "bundle": true,
-        "thirdParty": true,
-        "format": ["cjs"],
+        "thirdParty": false,
+        "format": ["esm"],
+        "banner": {
+          "js": "#!/usr/bin/env node"
+        },
         "watch": false,
-        "assets": []
+        "assets": [],
+        "generatePackageJson": true
       },
       "configurations": {
         "development": {
@@ -25,7 +29,7 @@
         },
         "production": {
           "watch": false,
-          "minify": true,
+          "minify": false,
           "sourcemap": false
         }
       }
@@ -47,7 +51,7 @@
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["{projectRoot}/**/*.ts"]
+        "lintFilePatterns": ["{projectRoot}/**/*.ts", "{projectRoot}/**/*.tsx"]
       }
     },
     "test": {

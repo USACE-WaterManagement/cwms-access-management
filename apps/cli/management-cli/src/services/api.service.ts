@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 
-import { logger } from '../utils/logger.js';
-import { getConfig } from '../utils/config.js';
+import { logger } from '../utils/logger';
+import { getConfig } from '../utils/config';
 
 export interface User {
   id: string;

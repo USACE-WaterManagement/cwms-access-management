@@ -1,6 +1,7 @@
 # OPA Whitelist Configuration
 
-The authorization proxy uses a whitelist pattern where only specified endpoints go through OPA policy evaluation. All other endpoints bypass OPA and act as a transparent proxy.
+The authorization proxy uses a whitelist pattern where only specified endpoints go through OPA policy evaluation. All
+other endpoints bypass OPA and act as a transparent proxy.
 
 ## Configuration
 
@@ -25,11 +26,7 @@ podman compose -f docker-compose.podman.yml restart authorizer-proxy
 ### Format
 
 ```json
-[
-  "/cwms-data/timeseries",
-  "/cwms-data/offices",
-  "/cwms-data/locations"
-]
+["/cwms-data/timeseries", "/cwms-data/offices", "/cwms-data/locations"]
 ```
 
 - Use full URL paths including `/cwms-data` prefix

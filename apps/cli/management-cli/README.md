@@ -2,6 +2,11 @@
 
 Command-line interface for managing CWMS authorization policies, users, and roles.
 
+## Documentation
+
+- [Installation Guide](docs/installation.md) - End-user installation and usage
+- [Distribution Guide](docs/distribution.md) - Building and distributing to users
+
 ## Technology Stack
 
 - [Node.js 24+](https://nodejs.org/) - JavaScript runtime
@@ -20,12 +25,12 @@ Command-line interface for managing CWMS authorization policies, users, and role
 pnpm nx build management-cli --configuration=production
 
 # Run the executable
-./dist/apps/cli/management-cli/index.cjs --help
+./dist/apps/cli/management-cli/index.js --help
 
 # Try commands
-./dist/apps/cli/management-cli/index.cjs users list
-./dist/apps/cli/management-cli/index.cjs roles list
-./dist/apps/cli/management-cli/index.cjs policies list
+./dist/apps/cli/management-cli/index.js users list
+./dist/apps/cli/management-cli/index.js roles list
+./dist/apps/cli/management-cli/index.js policies list
 ```
 
 ## Getting Started
@@ -51,19 +56,19 @@ Build for production:
 pnpm nx build management-cli --configuration=production
 ```
 
-Output location: `dist/apps/cli/management-cli/index.cjs` (166 KB)
+Output location: `dist/apps/cli/management-cli/index.js` (166 KB)
 
 The executable is already marked as executable and includes a shebang, so you can run it directly:
 
 ```bash
 # Show help
-./dist/apps/cli/management-cli/index.cjs --help
+./dist/apps/cli/management-cli/index.js --help
 
 # Show version
-./dist/apps/cli/management-cli/index.cjs --version
+./dist/apps/cli/management-cli/index.js --version
 
 # Run commands
-./dist/apps/cli/management-cli/index.cjs users list
+./dist/apps/cli/management-cli/index.js users list
 ```
 
 ### Development Mode
@@ -107,7 +112,7 @@ You can run commands in two ways:
 
 1. **Direct executable** (from monorepo root):
    ```bash
-   ./dist/apps/cli/management-cli/index.cjs <command>
+   ./dist/apps/cli/management-cli/index.js <command>
    ```
 
 2. **Global command** (after `npm link`):
@@ -115,7 +120,7 @@ You can run commands in two ways:
    cwms-admin <command>
    ```
 
-Examples below use the global command format. Replace `cwms-admin` with `./dist/apps/cli/management-cli/index.cjs` if not installed globally.
+Examples below use the global command format. Replace `cwms-admin` with `./dist/apps/cli/management-cli/index.js` if not installed globally.
 
 ### Authentication
 
@@ -124,7 +129,7 @@ Login to the management API:
 ```bash
 cwms-admin login -u admin -p admin -a http://localhost:3002
 # or
-./dist/apps/cli/management-cli/index.cjs login -u admin -p admin -a http://localhost:3002
+./dist/apps/cli/management-cli/index.js login -u admin -p admin -a http://localhost:3002
 ```
 
 Logout:
@@ -142,7 +147,7 @@ List all users:
 ```bash
 cwms-admin users list
 # or
-./dist/apps/cli/management-cli/index.cjs users list
+./dist/apps/cli/management-cli/index.js users list
 ```
 
 Show user details:
@@ -150,7 +155,7 @@ Show user details:
 ```bash
 cwms-admin users show <username>
 # or
-./dist/apps/cli/management-cli/index.cjs users show <username>
+./dist/apps/cli/management-cli/index.js users show <username>
 ```
 
 ### Roles
@@ -237,13 +242,14 @@ The API URL is set during login with the `-a` flag (defaults to `http://localhos
 This CLI follows modern Node.js best practices:
 
 - Commander for command structure and parsing
-- Table package for formatted terminal tables
+- Ink for terminal UI with React components
+- Custom table component with box-drawing characters
 - Ora for loading states and spinners
 - Chalk for colored output
 - Pino for structured logging
 - Modular command structure
 - Type-safe with TypeScript
-- CommonJS bundled executable with esbuild
+- ESM bundled executable with esbuild
 
 ## Testing
 
@@ -265,28 +271,24 @@ pnpm nx lint management-cli
 
 ## Distribution
 
-To create a standalone executable:
+See the [Distribution Guide](docs/distribution.md) for detailed instructions on building and distributing to users.
 
-1. Build with production configuration:
-   ```bash
-   pnpm nx build management-cli --configuration=production
-   ```
+Quick summary:
 
-2. The output includes a shebang for direct execution
-3. Make it executable:
-   ```bash
-   chmod +x dist/apps/cli/management-cli/index.js
-   ```
+```bash
+# Build distribution packages
+./apps/cli/management-cli/scripts/build-executable.sh
 
-4. Optional: Bundle with pkg or ncc for true single-binary distribution
+# Install globally for testing
+cd dist/apps/cli/management-cli
+npm link
+```
 
 ## Future Enhancements
 
-- Interactive mode with prompts
-- Bulk operations support
-- Configuration file support
-- Shell completion scripts
 - User creation and management
 - Role assignment operations
 - Policy editing capabilities
-- Enhanced table formatting with custom themes
+- Interactive mode with prompts
+- Bulk operations support
+- Shell completion scripts

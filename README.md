@@ -4,7 +4,9 @@ Authorization proxy and access control system for CWMS Data API.
 
 ## Overview
 
-The CWMS Access Management system provides transparent authorization for CWMS Data API using Open Policy Agent (OPA) with a whitelist-based approach. It intercepts API requests, evaluates authorization policies, and adds a single authorization context header before forwarding to the downstream API.
+The CWMS Access Management system provides transparent authorization for CWMS Data API using Open Policy Agent (OPA)
+with a whitelist-based approach. It intercepts API requests, evaluates authorization policies, and adds a single
+authorization context header before forwarding to the downstream API.
 
 ## Quick Start
 
@@ -45,18 +47,19 @@ flowchart LR
 
 ### Key Components
 
-| Component | Port | Description |
-|-----------|------|-------------|
-| **Management UI** | 4200 | Web interface for viewing users, roles, and policies |
-| **Management CLI** | - | Command-line tool for administration tasks |
+| Component               | Port | Description                                               |
+| ----------------------- | ---- | --------------------------------------------------------- |
+| **Management UI**       | 4200 | Web interface for viewing users, roles, and policies      |
+| **Management CLI**      | -    | Command-line tool for administration tasks                |
 | **Authorization Proxy** | 3001 | Transparent proxy that intercepts and authorizes requests |
-| **OPA** | 8181 | Policy engine for authorization decisions |
-| **Redis** | 6379 | Caches authorization decisions for performance |
-| **CWMS Data API** | 7001 | Downstream API being protected |
+| **OPA**                 | 8181 | Policy engine for authorization decisions                 |
+| **Redis**               | 6379 | Caches authorization decisions for performance            |
+| **CWMS Data API**       | 7001 | Downstream API being protected                            |
 
 ## Management Applications
 
 ### Management UI
+
 Web-based interface for viewing authorization policies, users, and roles.
 
 - **Access**: [http://localhost:4200](http://localhost:4200)
@@ -64,6 +67,7 @@ Web-based interface for viewing authorization policies, users, and roles.
 - **Documentation**: [apps/web/management-ui/README.md](apps/web/management-ui/README.md)
 
 ### Management CLI
+
 Command-line tool for managing authorization policies, users, and roles.
 
 - **Executable**: `./dist/apps/cli/management-cli/index.cjs`
@@ -83,12 +87,13 @@ Command-line tool for managing authorization policies, users, and roles.
 ### Service Documentation
 
 - [Configuration Guide](apps/services/authorizer-proxy/docs/configuration.md) - Environment variables and settings
-- [OPA Whitelist Guide](apps/services/authorizer-proxy/docs/opa-whitelist-guide.md) - Whitelist pattern and endpoint configuration
+- [OPA Whitelist Guide](apps/services/authorizer-proxy/docs/opa-whitelist-guide.md) - Whitelist pattern and endpoint
+  configuration
 - [Authentication](apps/services/authorizer-proxy/docs/authentication.md) - JWT and Keycloak integration
 
 ## Project Structure
 
-```
+```text
 cwms-access-management/
 ├── apps/
 │   ├── web/
@@ -114,15 +119,18 @@ cwms-access-management/
 - **Node.js 24+**
 - **pnpm 10.15.1+**
 - **Podman or Docker**
-- **CWMS Infrastructure** - Complete the setup from the [cwms-data-api repository](https://github.com/HydrologicEngineeringCenter/cwms-data-api) first:
+- **CWMS Infrastructure** - Complete the setup from the
+  [cwms-data-api repository](https://github.com/HydrologicEngineeringCenter/cwms-data-api) first:
   - Oracle Database (cwmsdb) running on port 1521
   - CWMS Data API (data-api) running on port 7001
   - Keycloak (auth) running on port 8080
   - Traefik (traefik) running on port 8081
 
-**Note**: The authorization proxy requires a running CWMS Data API instance. Set up the cwms-data-api project before proceeding.
+**Note**: The authorization proxy requires a running CWMS Data API instance. Set up the cwms-data-api project before
+proceeding.
 
 **Recommended**: Use [mise](https://mise.jdx.dev/) to manage tool versions:
+
 ```bash
 mise install  # Installs Node 24 and pnpm 10.15.1
 ```
@@ -162,6 +170,7 @@ See the [development guide](docs/development.md) for complete command reference.
 ## Support
 
 For issues and troubleshooting:
+
 1. Check the [troubleshooting guide](docs/troubleshooting.md)
 2. Review container logs: `podman logs authorizer-proxy`
 3. Verify configuration: `cat .env`

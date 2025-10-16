@@ -9,13 +9,16 @@ Before you begin, ensure you have:
 - **Node.js 24+**
 - **pnpm 10.15.1+**
 - **Podman or Docker**
-- **CWMS Infrastructure Setup Complete** - You must first complete the setup from the [cwms-data-api repository](https://github.com/HydrologicEngineeringCenter/cwms-data-api). This includes:
+- **CWMS Infrastructure Setup Complete** - You must first complete the setup from the
+  [cwms-data-api repository](https://github.com/HydrologicEngineeringCenter/cwms-data-api). This includes:
   - Oracle Database container (cwmsdb) running on port 1521
   - CWMS Data API container (data-api) running on port 7001
   - Keycloak container (auth) running on port 8080
   - Traefik container (traefik) running on port 8081
 
-**IMPORTANT**: If you haven't set up the cwms-data-api project yet, do that first before proceeding with this authorization proxy setup. Follow the instructions in the cwms-data-api repository's README to get the database and API containers running.
+**IMPORTANT**: If you haven't set up the cwms-data-api project yet, do that first before proceeding with this
+authorization proxy setup. Follow the instructions in the cwms-data-api repository's README to get the database and API
+containers running.
 
 ### Tool Installation
 
@@ -94,7 +97,8 @@ podman ps
 
 ### 3. Configure Keycloak
 
-The CWMS realm configuration is provided in the cwms-data-api repository. Import this realm to get pre-configured users and client settings.
+The CWMS realm configuration is provided in the cwms-data-api repository. Import this realm to get pre-configured users
+and client settings.
 
 #### Import Realm Configuration
 
@@ -124,6 +128,7 @@ podman exec auth /opt/keycloak/bin/kcadm.sh get realms/cwms | jq '.enabled'
 ```
 
 The realm.json file includes:
+
 - Pre-configured test users (l1hectest, l2hectest, m5hectest, q0hecoidc)
 - CWMS client with directAccessGrantsEnabled: true
 - Required roles (cwms_user, offline_access, uma_authorization)
@@ -132,7 +137,7 @@ The realm.json file includes:
 
 If you don't have access to the realm.json file:
 
-1. Open http://localhost:8080/auth/admin/
+1. Open <http://localhost:8080/auth/admin/>
 2. Login with `admin` / `admin`
 3. Create **cwms** realm
 4. Go to **Clients** > Create > **cwms**
@@ -153,12 +158,12 @@ podman exec auth /opt/keycloak/bin/kcadm.sh get users -r cwms \
 
 Expected users:
 
-| Username | Password | Office | Permissions | Purpose |
-|----------|----------|--------|-------------|---------|
-| `l1hectest` | `l1hectest` | SPL | None | Test access denial scenarios |
-| `l2hectest` | `l2hectest` | SPK | CWMS Users, TS ID Creator | General user with full permissions |
-| `m5hectest` | `m5hectest` | SWT | CWMS Users, TS ID Creator | General user with full permissions |
-| `q0hecoidc` | `q0hecoidc` | N/A | Keycloak only | Test user creation workflow |
+| Username    | Password    | Office | Permissions               | Purpose                            |
+| ----------- | ----------- | ------ | ------------------------- | ---------------------------------- |
+| `l1hectest` | `l1hectest` | SPL    | None                      | Test access denial scenarios       |
+| `l2hectest` | `l2hectest` | SPK    | CWMS Users, TS ID Creator | General user with full permissions |
+| `m5hectest` | `m5hectest` | SWT    | CWMS Users, TS ID Creator | General user with full permissions |
+| `q0hecoidc` | `q0hecoidc` | N/A    | Keycloak only             | Test user creation workflow        |
 
 #### Test Authentication
 
@@ -232,7 +237,8 @@ After setup is complete, you can:
 1. **Start the authorization services**: See [development.md](development.md) for local development
 2. **Run in containers**: See [container-operations.md](container-operations.md) for Docker/Podman
 3. **Test the proxy**: Try the examples in the [README](../README.md)
-4. **Review OPA configuration**: See [OPA whitelist guide](../apps/services/authorizer-proxy/docs/opa-whitelist-guide.md)
+4. **Review OPA configuration**: See
+   [OPA whitelist guide](../apps/services/authorizer-proxy/docs/opa-whitelist-guide.md)
 
 ## Troubleshooting
 

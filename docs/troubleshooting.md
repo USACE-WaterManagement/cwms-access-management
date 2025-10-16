@@ -31,18 +31,20 @@ podman logs authorizer-proxy --tail 100
 ```
 
 **Solution**:
+
 - If endpoints respond correctly, the services are working fine
 - The "unhealthy" status is a known issue with health check timing
 - Services are functional despite the status indicator
 
 **Permanent Fix**: Adjust health check configuration in `docker-compose.podman.yml`:
+
 ```yaml
 healthcheck:
-  test: ["CMD", "wget", "--spider", "-q", "http://localhost:3001/health"]
+  test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:3001/health']
   interval: 30s
   timeout: 10s
   retries: 3
-  start_period: 60s  # Increase if service takes longer to start
+  start_period: 60s # Increase if service takes longer to start
 ```
 
 ### Service Won't Start
@@ -50,6 +52,7 @@ healthcheck:
 **Symptom**: Container immediately exits or won't start
 
 **Diagnosis**:
+
 ```bash
 # Check container status
 podman ps -a
@@ -64,6 +67,7 @@ podman inspect authorizer-proxy | grep -A 5 State
 **Common Causes**:
 
 1. **Port conflicts**:
+
    ```bash
    # Check what's using the port (macOS)
    lsof -i :3001
@@ -73,23 +77,27 @@ podman inspect authorizer-proxy | grep -A 5 State
    ```
 
    **Solution**: Change port in `.env`:
+
    ```bash
    PORT=3002
    AUTHORIZER_PROXY_PORT=3002
    ```
 
 2. **Missing dependencies**:
+
    ```bash
    # Check if dependent services are running
    podman ps | grep -E "opa|redis|data-api"
    ```
 
    **Solution**: Start dependent services first:
+
    ```bash
    podman compose -f docker-compose.podman.yml up -d redis opa
    ```
 
 3. **Configuration errors**:
+
    ```bash
    # Check environment variables
    podman exec authorizer-proxy env
@@ -104,6 +112,7 @@ podman inspect authorizer-proxy | grep -A 5 State
 **Symptom**: Container starts but exits within seconds
 
 **Diagnosis**:
+
 ```bash
 # Check exit code
 podman ps -a --filter "name=authorizer-proxy" --format "{{.Status}}"
@@ -115,6 +124,7 @@ podman logs authorizer-proxy
 **Common Causes**:
 
 1. **Application crashes on startup**:
+
    ```bash
    # Look for JavaScript errors
    podman logs authorizer-proxy | grep -E "Error|Exception"
@@ -123,6 +133,7 @@ podman logs authorizer-proxy
    **Solution**: Check application code and configuration
 
 2. **Missing environment variables**:
+
    ```bash
    # Check required variables
    podman exec authorizer-proxy env | grep -E "CWMS_API_URL|OPA_URL|REDIS_URL"
@@ -135,6 +146,7 @@ podman logs authorizer-proxy
 **Symptom**: `podman exec` fails or container is unreachable
 
 **Diagnosis**:
+
 ```bash
 # Check if container is running
 podman ps | grep authorizer-proxy
@@ -144,6 +156,7 @@ podman exec authorizer-proxy echo "test"
 ```
 
 **Solution**:
+
 ```bash
 # Restart container
 podman restart authorizer-proxy
@@ -160,6 +173,7 @@ podman compose -f docker-compose.podman.yml up -d authorizer-proxy
 **Symptom**: Proxy returns 502 Bad Gateway or connection errors
 
 **Diagnosis**:
+
 ```bash
 # Check if data-api is running
 podman ps | grep data-api
@@ -172,6 +186,7 @@ podman exec authorizer-proxy wget -O- http://data-api:7000/cwms-data/offices
 **Solution**:
 
 1. **Verify network configuration**:
+
    ```bash
    # Check if containers are on same network
    podman network inspect cwmsdb_net | grep -A 5 authorizer-proxy
@@ -179,6 +194,7 @@ podman exec authorizer-proxy wget -O- http://data-api:7000/cwms-data/offices
    ```
 
 2. **Ensure external network exists**:
+
    ```bash
    # Create if missing
    podman network create cwmsdb_net
@@ -188,6 +204,7 @@ podman exec authorizer-proxy wget -O- http://data-api:7000/cwms-data/offices
    ```
 
 3. **Check CWMS_API_URL configuration**:
+
    ```bash
    # Should use container name, not localhost
    # Correct: http://data-api:7000/cwms-data
@@ -199,6 +216,7 @@ podman exec authorizer-proxy wget -O- http://data-api:7000/cwms-data/offices
 **Symptom**: Proxy logs show OPA connection errors
 
 **Diagnosis**:
+
 ```bash
 # Check OPA status
 podman ps | grep opa
@@ -209,6 +227,7 @@ podman exec authorizer-proxy wget -O- http://opa:8181/health
 ```
 
 **Solution**:
+
 ```bash
 # Restart OPA
 podman restart opa
@@ -226,6 +245,7 @@ podman exec authorizer-proxy env | grep OPA_URL
 **Symptom**: Cache errors in logs
 
 **Diagnosis**:
+
 ```bash
 # Check Redis status
 podman ps | grep redis
@@ -236,6 +256,7 @@ podman exec authorizer-proxy sh -c "echo PING | nc redis 6379"
 ```
 
 **Solution**:
+
 ```bash
 # Restart Redis
 podman restart redis-cache
@@ -255,6 +276,7 @@ podman exec authorizer-proxy env | grep REDIS_URL
 **Symptom**: Cannot get JWT token from Keycloak
 
 **Diagnosis**:
+
 ```bash
 # Test Keycloak availability
 curl http://localhost:8080/auth/realms/cwms
@@ -271,6 +293,7 @@ curl -v -X POST http://localhost:8080/auth/realms/cwms/protocol/openid-connect/t
 **Common Causes**:
 
 1. **Realm not enabled**:
+
    ```bash
    # Check realm status
    podman exec auth /opt/keycloak/bin/kcadm.sh config credentials \
@@ -280,11 +303,13 @@ curl -v -X POST http://localhost:8080/auth/realms/cwms/protocol/openid-connect/t
    ```
 
    **Solution**: Enable realm:
+
    ```bash
    podman exec auth /opt/keycloak/bin/kcadm.sh update realms/cwms -s enabled=true
    ```
 
 2. **Direct Access Grants not enabled**:
+
    ```bash
    # Check client configuration
    podman exec auth /opt/keycloak/bin/kcadm.sh get clients -r cwms \
@@ -294,6 +319,7 @@ curl -v -X POST http://localhost:8080/auth/realms/cwms/protocol/openid-connect/t
    **Solution**: See [setup.md](setup.md#3-configure-keycloak)
 
 3. **User doesn't exist**:
+
    ```bash
    # List users
    podman exec auth /opt/keycloak/bin/kcadm.sh get users -r cwms \
@@ -305,6 +331,7 @@ curl -v -X POST http://localhost:8080/auth/realms/cwms/protocol/openid-connect/t
 **Symptom**: All requests return 403 Forbidden
 
 **Diagnosis**:
+
 ```bash
 # Check OPA policy
 curl -X POST http://localhost:8181/v1/data/cwms/authz/allow \
@@ -324,18 +351,21 @@ podman logs authorizer-proxy | grep -i "authorization"
 **Solution**:
 
 1. **Check whitelist configuration**:
+
    ```bash
    # View configured whitelist
    podman logs authorizer-proxy | grep "whitelistedEndpoints"
    ```
 
 2. **Test with BYPASS_AUTH**:
+
    ```bash
    # Temporarily bypass authorization
    BYPASS_AUTH=true podman compose -f docker-compose.podman.yml up -d --force-recreate authorizer-proxy
    ```
 
 3. **Verify OPA policy**:
+
    ```bash
    # Check policy file
    cat policies/cwms_authz.rego
@@ -348,6 +378,7 @@ podman logs authorizer-proxy | grep -i "authorization"
 **Symptom**: `pnpm install` or build fails
 
 **Diagnosis**:
+
 ```bash
 # Check Node.js version
 node --version  # Should be 24.x
@@ -363,12 +394,14 @@ pnpm install
 **Solution**:
 
 1. **Use mise to install correct versions**:
+
    ```bash
    mise install
    mise exec -- pnpm install
    ```
 
 2. **Clear pnpm cache**:
+
    ```bash
    pnpm store prune
    pnpm install --force
@@ -379,6 +412,7 @@ pnpm install
 **Symptom**: `podman build` or `podman compose build` fails
 
 **Diagnosis**:
+
 ```bash
 # Check build logs
 podman compose -f docker-compose.podman.yml build authorizer-proxy 2>&1 | tee build.log
@@ -390,6 +424,7 @@ grep -i error build.log
 **Common Causes**:
 
 1. **Network issues during build**:
+
    ```bash
    # Retry with verbose output
    podman build --no-cache -t cwms-authorizer-proxy:local-dev \
@@ -397,6 +432,7 @@ grep -i error build.log
    ```
 
 2. **Disk space issues**:
+
    ```bash
    # Check disk space
    df -h
@@ -406,6 +442,7 @@ grep -i error build.log
    ```
 
 3. **Build cache corruption**:
+
    ```bash
    # Build without cache
    podman compose -f docker-compose.podman.yml build --no-cache
@@ -418,6 +455,7 @@ grep -i error build.log
 **Symptom**: Changes to `.env` file don't take effect
 
 **Diagnosis**:
+
 ```bash
 # Check running container's environment
 podman exec authorizer-proxy env | sort
@@ -444,6 +482,7 @@ podman compose -f docker-compose.podman.yml up -d --force-recreate authorizer-pr
 **Symptom**: Wrong endpoints are being authorized by OPA
 
 **Diagnosis**:
+
 ```bash
 # Check whitelist configuration on startup
 podman logs authorizer-proxy | grep "whitelistedEndpoints"
@@ -455,6 +494,7 @@ cat .env | grep OPA_WHITELIST_ENDPOINTS
 **Solution**:
 
 1. **Update whitelist**:
+
    ```bash
    # Edit whitelist file
    vi opa-whitelist.json
@@ -471,6 +511,7 @@ cat .env | grep OPA_WHITELIST_ENDPOINTS
    ```
 
 2. **Check JSON format**:
+
    ```bash
    # Validate JSON
    jq . opa-whitelist.json
@@ -483,6 +524,7 @@ cat .env | grep OPA_WHITELIST_ENDPOINTS
 **Symptom**: Requests take longer than expected
 
 **Diagnosis**:
+
 ```bash
 # Test response time
 time curl http://localhost:3001/cwms-data/offices
@@ -497,17 +539,20 @@ podman stats authorizer-proxy
 **Solution**:
 
 1. **Check Redis cache hit rate**:
+
    ```bash
    podman exec redis-cache redis-cli INFO stats | grep keyspace_hits
    ```
 
 2. **Increase cache TTL**:
+
    ```bash
    # In .env
    CACHE_TTL_SECONDS=600  # Increase from 300
    ```
 
 3. **Check OPA performance**:
+
    ```bash
    podman logs opa | grep "timer_rego_query_eval"
    ```
@@ -517,6 +562,7 @@ podman stats authorizer-proxy
 **Symptom**: Container uses excessive memory
 
 **Diagnosis**:
+
 ```bash
 # Check memory usage
 podman stats --no-stream authorizer-proxy
@@ -528,6 +574,7 @@ podman exec authorizer-proxy node -e "console.log(process.memoryUsage())"
 **Solution**:
 
 1. **Limit Redis memory**:
+
    ```bash
    # Already configured in docker-compose.podman.yml
    # maxmemory 256mb
@@ -535,12 +582,14 @@ podman exec authorizer-proxy node -e "console.log(process.memoryUsage())"
    ```
 
 2. **Reduce cache size**:
+
    ```bash
    # In .env
    CACHE_MAX_SIZE=500  # Reduce from 1000
    ```
 
 3. **Set Node.js memory limit**:
+
    ```bash
    # Add to docker-compose.podman.yml
    environment:

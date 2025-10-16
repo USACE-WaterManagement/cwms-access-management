@@ -12,11 +12,12 @@ env.ts
 # env file
 .env
 
-
+.DS_Store
 
 .nx/cache
 .nx/workspace-data
 
 dist
 apps/services/entity-manager/admin_token.json
-.DS_Store
+tmp
+release

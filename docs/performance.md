@@ -1,6 +1,7 @@
 # Performance Optimization
 
-This guide covers performance optimization techniques for the CWMS Authorization Proxy, including caching, profiling, and monitoring.
+This guide covers performance optimization techniques for the CWMS Authorization Proxy, including caching, profiling,
+and monitoring.
 
 ## Overview
 
@@ -13,7 +14,8 @@ The authorization proxy is designed for high performance with minimal latency. K
 
 ## Redis Caching (Planned)
 
-Redis caching for authorization decisions is configured in the infrastructure but not yet implemented in the application code.
+Redis caching for authorization decisions is configured in the infrastructure but not yet implemented in the application
+code.
 
 ### Current Status
 
@@ -25,6 +27,7 @@ Redis caching for authorization decisions is configured in the infrastructure bu
 ### Planned Implementation
 
 When Redis caching is implemented, it will:
+
 - Cache authorization decisions to reduce repeated OPA evaluations
 - Use configurable TTL for cache entries
 - Implement cache key strategies based on user context and resource
@@ -163,6 +166,7 @@ services:
 ### Connection Pooling
 
 The proxy maintains connection pools for:
+
 - OPA HTTP client
 - CWMS Data API HTTP client
 - Redis connection
@@ -183,13 +187,14 @@ For high-volume scenarios, consider batching authorization decisions:
 const decisions = await Promise.all([
   checkAuthorization(user, 'resource1'),
   checkAuthorization(user, 'resource2'),
-  checkAuthorization(user, 'resource3')
+  checkAuthorization(user, 'resource3'),
 ]);
 ```
 
 ### Async Processing
 
 All I/O operations are asynchronous:
+
 - OPA policy evaluation
 - Redis cache lookups
 - Downstream API requests
@@ -252,16 +257,19 @@ time curl -s http://localhost:3001/cwms-data/offices \
 ### Slow Responses
 
 1. Check OPA response times:
+
    ```bash
    podman logs opa | grep "timer_rego_query_eval"
    ```
 
 2. Check Redis connectivity:
+
    ```bash
    podman exec authorizer-proxy time redis-cli -h redis ping
    ```
 
 3. Check downstream API:
+
    ```bash
    time curl -s http://localhost:7001/cwms-data/offices > /dev/null
    ```
@@ -269,29 +277,34 @@ time curl -s http://localhost:3001/cwms-data/offices \
 ### High Memory Usage
 
 1. Check for memory leaks:
+
    ```bash
    podman stats authorizer-proxy
    ```
 
 2. Reduce cache size:
+
    ```bash
    CACHE_MAX_SIZE=500
    ```
 
 3. Set Node.js heap limit:
+
    ```yaml
    environment:
-     NODE_OPTIONS: "--max-old-space-size=512"
+     NODE_OPTIONS: '--max-old-space-size=512'
    ```
 
 ### High CPU Usage
 
 1. Check request volume:
+
    ```bash
    podman logs authorizer-proxy | grep "incoming request" | wc -l
    ```
 
 2. Profile CPU usage:
+
    ```bash
    node --prof server.js
    ```
@@ -303,6 +316,7 @@ time curl -s http://localhost:3001/cwms-data/offices \
 1. **Implement Redis caching** to reduce OPA evaluation overhead
 
 2. **Enable Redis persistence** when caching is implemented:
+
    ```yaml
    command: redis-server --appendonly yes
    ```
