@@ -84,6 +84,8 @@ services:
       # OPA Whitelist Configuration (from .env - SINGLE SOURCE OF TRUTH)
       # Set this in .env file or load from opa-whitelist.json using ./scripts/load-whitelist.sh
       OPA_WHITELIST_ENDPOINTS: ${OPA_WHITELIST_ENDPOINTS:-["/cwms-data/timeseries","/cwms-data/offices"]}
+      # CWMS API Key Configuration (from .env)
+      CWMS_API_KEY: ${CWMS_API_KEY:-}
     depends_on:
       - redis
       - opa
