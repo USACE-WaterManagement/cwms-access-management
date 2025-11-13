@@ -4,6 +4,16 @@ export interface User {
   email?: string;
   roles: string[];
   offices: string[];
+  primary_office?: string;
+  persona?: string;
+  region?: string;
+  timezone?: string;
+  shift_start?: number;
+  shift_end?: number;
+  authenticated?: boolean;
+  auth_method?: string;
+  allowed_parameters?: string[];
+  partnership_expiry?: string;
   attributes?: Record<string, any>;
 }
 

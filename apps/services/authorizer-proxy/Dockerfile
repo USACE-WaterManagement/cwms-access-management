@@ -2,6 +2,14 @@
 # Stage 1: Build stage
 FROM node:24-alpine AS builder
 
+# Install build dependencies for native modules (oracledb)
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    libaio-dev \
+    libnsl
+
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@10.15.1 --activate
 
@@ -12,7 +20,7 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml nx.json tsconfig.base.json ./
 COPY apps/services/authorizer-proxy/package.json ./apps/services/authorizer-proxy/
 
-# Install dependencies
+# Install dependencies (includes oracledb native compilation)
 RUN pnpm install --frozen-lockfile --filter @cwms-access-management/authorizer-proxy...
 
 # Copy source code
@@ -25,6 +33,11 @@ RUN pnpm nx build authorizer-proxy
 # Stage 2: Production stage - using Node 24 alpine for minimal size
 FROM node:24-alpine
 
+# Install runtime dependencies for Oracle Instant Client
+RUN apk add --no-cache \
+    libaio \
+    libnsl
+
 # Set working directory
 WORKDIR /app
 
@@ -34,6 +47,9 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 # Copy built application from builder
 COPY --from=builder --chown=nodejs:nodejs /app/dist/apps/services/authorizer-proxy ./
 COPY --from=builder --chown=nodejs:nodejs /app/apps/services/authorizer-proxy/package.json ./
+
+# Copy node_modules with native bindings from builder
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 
 # Set environment variables
 ENV NODE_ENV=production
