@@ -146,7 +146,42 @@ If you don't have access to the realm.json file:
 7. Click **Save**
 8. Create test users manually
 
-### 4. Verify Test Users
+### 4. Initialize Test Users
+
+After importing the realm, you need to initialize all 8 test users in both Keycloak and the CWMS database with proper
+principal mappings:
+
+```bash
+# Run the initialization script
+./scripts/initialize-test-users.sh
+```
+
+This script will:
+
+1. Create/update all 8 test users in Keycloak
+2. Retrieve Keycloak subject UUIDs for each user
+3. Create/update users in CWMS database with proper offices
+4. Map Keycloak users to CWMS users via `principle_name` field
+5. Assign appropriate roles (NOT admin roles)
+6. Create API keys for service accounts
+7. Validate the complete setup
+
+**All 8 Test Personas**:
+
+| Username       | Password       | Office | Persona             | Purpose                        |
+| -------------- | -------------- | ------ | ------------------- | ------------------------------ |
+| `damop001`     | `damop001`     | SPK    | Dam Operator        | Shift-based operational access |
+| `m5hectest`    | `m5hectest`    | SWT    | Water Manager       | Embargo override, full access  |
+| `datamgr001`   | `datamgr001`   | SWT    | Data Manager        | Regional access                |
+| `l1hectest`    | `l1hectest`    | SPL    | Limited User        | Test access denial scenarios   |
+| `l2hectest`    | `l2hectest`    | SPK    | General User        | Basic CWMS user                |
+| `apicollector` | `apicollector` | SPK    | Automated Collector | API key, write only            |
+| `apiprocessor` | `apiprocessor` | HQ     | Automated Processor | Cross-office read              |
+| `extpartner`   | `extpartner`   | SPK    | External Cooperator | Limited parameters             |
+
+See [docs/user-personas.md](user-personas.md) for detailed persona descriptions.
+
+#### Verify Test Users
 
 Check that test users exist in Keycloak:
 
@@ -155,15 +190,6 @@ Check that test users exist in Keycloak:
 podman exec auth /opt/keycloak/bin/kcadm.sh get users -r cwms \
   | jq -r '.[].username'
 ```
-
-Expected users:
-
-| Username    | Password    | Office | Permissions               | Purpose                            |
-| ----------- | ----------- | ------ | ------------------------- | ---------------------------------- |
-| `l1hectest` | `l1hectest` | SPL    | None                      | Test access denial scenarios       |
-| `l2hectest` | `l2hectest` | SPK    | CWMS Users, TS ID Creator | General user with full permissions |
-| `m5hectest` | `m5hectest` | SWT    | CWMS Users, TS ID Creator | General user with full permissions |
-| `q0hecoidc` | `q0hecoidc` | N/A    | Keycloak only             | Test user creation workflow        |
 
 #### Test Authentication
 
