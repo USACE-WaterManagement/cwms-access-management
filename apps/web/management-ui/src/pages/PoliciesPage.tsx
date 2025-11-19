@@ -1,27 +1,47 @@
 import { useQuery } from '@tanstack/react-query';
+import { AlertCircle, Code2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
+import { apiService, Policy } from '../services/api.service';
 
 import PolicyCard from '@/components/PolicyCard';
-import { apiService } from '../services/api.service';
-import { Code2 } from 'lucide-react';
+import PolicyList from '@/components/PolicyList';
 
 export default function PoliciesPage() {
-  const { data: policies, isLoading, error } = useQuery({
+
+  const {
+    data: policies,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['policies'],
     queryFn: () => apiService.getPolicies(),
   });
 
+  const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null);
+
+  function handlePolicySelect(policy: Policy) {
+    setSelectedPolicy(policy);
+  }
+
+  useEffect(() => {
+    if (policies && policies.length > 0 && !selectedPolicy) {
+      setSelectedPolicy(policies[0]);
+    }
+  }, [policies, selectedPolicy]);
+
   return (
     <div className='px-4 py-6 sm:px-0'>
-      <div className='bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-2 hover:shadow-xl hover:border-slate-300 transition-all duration-300'>
-        <div className='px-4 py-5 sm:px-6'>
-          <div className='flex items-center gap-3'>
-            <div className='h-10 w-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md'>
-              <Code2 className='h-6 w-6 text-white' />
-            </div>
-            <h2 className='text-3xl leading-6 font-bold text-gray-900'>Authorization Policies</h2>
-          </div>
 
-          <p className='mt-1 max-w-2xl text-lg text-gray-500'>View OPA authorization policies and rules</p>
+      <div className='px-4 py-5 sm:px-6 mb-4'>
+        <div className='flex items-center gap-3'>
+          <div className='h-10 w-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md'>
+            <Code2 className='h-6 w-6 text-white' />
+          </div>
+          <div className='space-y-1'>
+            <h2 className='text-2xl leading-6 font-bold text-gray-900'>Authorization Policies</h2>
+            <p className='text-md max-w-2xl  text-gray-500'>View OPA authorization policies and rules</p>
+          </div>
         </div>
       </div>
 
@@ -33,17 +53,24 @@ export default function PoliciesPage() {
         </div>
       )}
 
-      {policies && policies.length === 0 && <div className='px-4 py-5 sm:px-6 text-gray-500'>No policies found</div>}
+      {policies && policies.length === 0 && (
+        <div className='flex flex-col items-center justify-center py-8 text-center'>
+          <AlertCircle className='w-8 h-8 text-muted-foreground mb-2' />
+          <div className='px-4 py-5 sm:px-6 text-gray-500'>No policies found</div>
+        </div>
+      )}
 
       {policies && policies.length > 0 && (
-        <ul className='divide-y divide-gray-200'>
-          {policies.map((policy) => (
-            <PolicyCard
-              key={policy.id}
-              policy={policy}
+        <div className='grid grid-cols-1 lg:grid-cols-4 gap-4'>
+          <div className='col-span-1'>
+            <PolicyList
+              policies={policies}
+              selectedPolicy={selectedPolicy}
+              onSelectPolicy={handlePolicySelect}
             />
-          ))}
-        </ul>
+          </div>
+          <div className='col-span-3'>{selectedPolicy && <PolicyCard policy={selectedPolicy} />}</div>
+        </div>
       )}
     </div>
   );
