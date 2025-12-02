@@ -28,19 +28,21 @@ export default function PoliciesPage() {
     if (policies && policies.length > 0 && !selectedPolicy) {
       setSelectedPolicy(policies[0]);
     }
-  }, [policies, selectedPolicy]);
+  }, [policies]);
 
   return (
     <div className='px-4 py-6 sm:px-0'>
-
       <div className='px-4 py-5 sm:px-6 mb-4'>
         <div className='flex items-center gap-3'>
           <div className='h-10 w-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md'>
-            <Code2 className='h-6 w-6 text-white' />
+            <Code2
+              className='h-6 w-6 text-white'
+              aria-hidden='true'
+            />
           </div>
           <div className='space-y-1'>
             <h2 className='text-2xl leading-6 font-bold text-gray-900'>Authorization Policies</h2>
-            <p className='text-md max-w-2xl  text-gray-500'>View OPA authorization policies and rules</p>
+            <p className='text-md max-w-2xl text-gray-500'>View OPA authorization policies and rules</p>
           </div>
         </div>
       </div>
@@ -55,7 +57,10 @@ export default function PoliciesPage() {
 
       {policies && policies.length === 0 && (
         <div className='flex flex-col items-center justify-center py-8 text-center'>
-          <AlertCircle className='w-8 h-8 text-muted-foreground mb-2' />
+          <AlertCircle
+            className='w-8 h-8 text-muted-foreground mb-2'
+            aria-hidden='true'
+          />
           <div className='px-4 py-5 sm:px-6 text-gray-500'>No policies found</div>
         </div>
       )}

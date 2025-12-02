@@ -17,6 +17,8 @@ export default function PolicyList({ policies, selectedPolicy, onSelectPolicy }:
           <button
             key={policy.id}
             onClick={() => onSelectPolicy(policy)}
+            aria-label={`Select ${policy.name} policy`}
+            aria-current={selectedPolicy?.id === policy.id ? 'true' : undefined}
             className={`w-full text-left p-3 rounded-lg transition-all ${
               selectedPolicy?.id === policy.id
                 ? 'bg-primary/20 border border-primary/50 shadow-lg shadow-primary/10 text-foreground'
@@ -27,7 +29,12 @@ export default function PolicyList({ policies, selectedPolicy, onSelectPolicy }:
                 <p className='text-sm font-semibold truncate'>{policy.name}</p>
                 <p className='text-xs text-muted-foreground line-clamp-1'>{policy.description}</p>
               </div>
-              {selectedPolicy?.id === policy.id && <Check className='w-4 h-4 text-primary flex-shrink-0 mt-0.5' />}
+              {selectedPolicy?.id === policy.id && (
+                <Check
+                  className='w-4 h-4 text-primary flex-shrink-0 mt-0.5'
+                  aria-hidden='true'
+                />
+              )}
             </div>
           </button>
         ))}

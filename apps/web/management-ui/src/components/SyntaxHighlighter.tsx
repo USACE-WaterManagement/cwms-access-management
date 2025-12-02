@@ -24,7 +24,7 @@ export default function SyntaxHighlighter({ code, className, showLineNumbers = t
   }, [code, showLineNumbers]);
 
   return (
-    <pre>
+    <pre className='h-full'>
       <code
         ref={ref}
         className={className}
@@ -33,17 +33,33 @@ export default function SyntaxHighlighter({ code, className, showLineNumbers = t
   );
 }
 
+/**
+ * Adds line numbers to a syntax-highlighted code element by wrapping each line
+ * in markup that includes the line number. Uses DOM manipulation to preserve
+ * highlight.js nodes and avoid innerHTML security concerns.
+ *
+ * @param element - The code element that has been syntax highlighted
+ */
 function addLineNumbers(element: HTMLElement) {
   const html = element.innerHTML;
   const lines = html.split('\n');
 
-  element.innerHTML = lines
-    .map(
-      (line, index) =>
-        `<span class="flex gap-5">
-        <span class="w-8 shrink-0 text-right text-slate-500 select-none">${index + 1}</span>
-        <span>${line || ' '}</span>
-      </span>`,
-    )
-    .join('');
+  element.textContent = '';
+
+  lines.forEach((lineHtml, index) => {
+    const lineWrapper = document.createElement('span');
+    lineWrapper.className = 'flex gap-5 line-wrapper';
+
+    const lineNumber = document.createElement('span');
+    lineNumber.className = 'w-8 shrink-0 text-right text-slate-500 select-none';
+    lineNumber.textContent = String(index + 1);
+
+    const lineContent = document.createElement('span');
+
+    lineContent.innerHTML = lineHtml || ' ';
+
+    lineWrapper.appendChild(lineNumber);
+    lineWrapper.appendChild(lineContent);
+    element.appendChild(lineWrapper);
+  });
 }
