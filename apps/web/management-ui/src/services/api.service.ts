@@ -19,7 +19,13 @@ export interface Policy {
   id: string;
   name: string;
   description: string;
-  rules: unknown;
+  rules: {
+    id: string;
+    raw: string;
+    ast: {
+      rules: unknown[];
+    };
+  };
 }
 
 export interface ApiResponse<T> {
