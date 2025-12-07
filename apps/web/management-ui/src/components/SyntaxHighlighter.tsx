@@ -1,14 +1,18 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import hljs from '../utils/highlightjs-setup';
 
 interface SyntaxHighlighterProps {
   code: string;
-  className: string;
+  className?: string;
   showLineNumbers?: boolean;
 }
 
-export default function SyntaxHighlighter({ code, className, showLineNumbers = true }: SyntaxHighlighterProps) {
+export default function SyntaxHighlighter({
+  code,
+  className = 'language-rego',
+  showLineNumbers = true,
+}: SyntaxHighlighterProps) {
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -16,50 +20,38 @@ export default function SyntaxHighlighter({ code, className, showLineNumbers = t
       ref.current.textContent = code; // Set text content safely to prevent XSS
       ref.current.removeAttribute('data-highlighted'); // Remove existing highlighting classes before re-highlighting
       hljs.highlightElement(ref.current);
-
-      if (showLineNumbers) {
-        addLineNumbers(ref.current);
-      }
     }
-  }, [code, showLineNumbers]);
+  }, [code]);
+
+  const lineNumbers = useMemo(() => {
+    return code.split('\n').map((_, i) => i + 1);
+  }, [code]);
 
   return (
-    <pre className='h-full'>
-      <code
-        ref={ref}
-        className={className}
-      />
-    </pre>
+    <div className='flex h-full font-mono rounded-xl text-sm bg-[#22272e] overflow-auto'>
+      {showLineNumbers && (
+        <div
+          className='shrink-0 flex flex-col items-end select-none text-slate-400 py-4 pr-3 pl-4'
+          aria-hidden='true'>
+          {lineNumbers.map((num) => (
+            <span
+              key={num}
+              className='leading-6'>
+              {num}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className='grow'>
+        <pre className='m-0 p-0'>
+          <code
+            ref={ref}
+            className={`block leading-6 p-4 ${className}`}>
+            {code}
+          </code>
+        </pre>
+      </div>
+    </div>
   );
-}
-
-/**
- * Adds line numbers to a syntax-highlighted code element by wrapping each line
- * in markup that includes the line number. Uses DOM manipulation to preserve
- * highlight.js nodes and avoid innerHTML security concerns.
- *
- * @param element - The code element that has been syntax highlighted
- */
-function addLineNumbers(element: HTMLElement) {
-  const html = element.innerHTML;
-  const lines = html.split('\n');
-
-  element.textContent = '';
-
-  lines.forEach((lineHtml, index) => {
-    const lineWrapper = document.createElement('span');
-    lineWrapper.className = 'flex gap-5 line-wrapper';
-
-    const lineNumber = document.createElement('span');
-    lineNumber.className = 'w-8 shrink-0 text-right text-slate-500 select-none';
-    lineNumber.textContent = String(index + 1);
-
-    const lineContent = document.createElement('span');
-
-    lineContent.innerHTML = lineHtml || ' ';
-
-    lineWrapper.appendChild(lineNumber);
-    lineWrapper.appendChild(lineContent);
-    element.appendChild(lineWrapper);
-  });
 }

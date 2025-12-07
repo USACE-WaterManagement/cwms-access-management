@@ -55,12 +55,7 @@ export default function PolicyCard({ policy }: PolicyCardProps) {
         <div className='flex-shrink-0 mb-4'>
           <p className='text-sm font-semibold text-slate-900 uppercase tracking-wide'>Policy Code</p>
         </div>
-        <div className='overflow-auto rounded-xl h-full'>
-          <SyntaxHighlighter
-            code={policy.rules.raw}
-            className='language-rego h-full'
-          />
-        </div>
+        <SyntaxHighlighter code={policy.rules.raw} />
       </div>
     </div>
   );
