@@ -1,13 +1,40 @@
-import { FileCode, FileKey, Workflow } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Check, Copy, FileCode, FileKey, Workflow } from 'lucide-react';
 
 import SyntaxHighlighter from './SyntaxHighlighter';
 
+import { Button } from '@/components/ui/button';
 import { Policy } from '@/services/api.service';
 interface PolicyCardProps {
   policy: Policy;
 }
 
 export default function PolicyCard({ policy }: PolicyCardProps) {
+  const [copied, setCopied] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(policy.rules.raw);
+      setCopied(true);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      alert('Failed to copy to clipboard. Please try again.');
+      console.error('Copy failed:', error);
+    }
+  };
+
   return (
     <div className='flex flex-col gap-4'>
       <div className='bg-white rounded-xl shadow-sm p-8 border border-gray-300'>
@@ -52,8 +79,27 @@ export default function PolicyCard({ policy }: PolicyCardProps) {
       </div>
 
       <div className='flex flex-col bg-white relative px-5 py-6 rounded-xl shadow-sm border border-gray-300 overflow-hidden h-[calc(100vh-400px)] min-h-[400px] max-h-[800px]'>
-        <div className='flex-shrink-0 mb-4'>
+        <div className='flex items-center justify-between flex-shrink-0 mb-4'>
           <p className='text-sm font-semibold text-slate-900 uppercase tracking-wide'>Policy Code</p>
+          <Button
+            className='mr-1'
+            variant='outline'
+            size='icon'
+            onClick={handleCopy}
+            title='Copy to clipboard'
+            aria-label={copied ? 'Copied to clipboard' : 'Copy to clipboard'}>
+            {copied ? (
+              <Check
+                className='w-4 h-4'
+                aria-hidden='true'
+              />
+            ) : (
+              <Copy
+                className='w-4 h-4'
+                aria-hidden='true'
+              />
+            )}
+          </Button>
         </div>
         <SyntaxHighlighter code={policy.rules.raw} />
       </div>
