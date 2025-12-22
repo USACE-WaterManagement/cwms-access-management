@@ -1,79 +1,52 @@
 package cwms.authz
 
+import data.cwms.helpers.offices
+import data.cwms.helpers.time_rules
+import data.cwms.personas.public
+import data.cwms.personas.dam_operator
+import data.cwms.personas.water_manager
+import data.cwms.personas.data_manager
+import data.cwms.personas.automated_collector
+import data.cwms.personas.automated_processor
+import data.cwms.personas.external_cooperator
 import future.keywords.contains
 import future.keywords.if
 import future.keywords.in
 
-# Default deny
 default allow := false
 
-# Allow health check endpoints
 allow if {
-    input.resource in ["health", "ready", "metrics"]
+    public.allow
 }
 
-# Public read-only endpoints
 allow if {
-    input.action == "read"
-    input.resource in ["offices", "units", "parameters"]
+    dam_operator.allow
 }
 
-
-# Dam Operator Permissions
 allow if {
-    "dam_operator" in input.user.roles
-    input.resource in ["timeseries", "measurements", "levels", "gates"]
-    input.action in ["read", "create", "update"]
+    water_manager.allow
 }
 
-# Water Manager Permissions
 allow if {
-    "water_manager" in input.user.roles
-    input.resource in ["forecasts", "models", "scenarios"]
-    input.action in ["read", "create", "update", "delete"]
+    data_manager.allow
 }
 
-# Data Manager Permissions
 allow if {
-    "data_manager" in input.user.roles
-    input.resource in ["timeseries", "locations", "catalogs", "ratings"]
-    input.action in ["read", "create", "update", "delete"]
+    automated_collector.allow
 }
 
-# HEC Employee Permissions (full access)
 allow if {
-    "hec_employee" in input.user.roles
+    automated_processor.allow
 }
 
-# System Admin Permissions (full access)
+allow if {
+    external_cooperator.allow
+}
+
 allow if {
     "system_admin" in input.user.roles
 }
 
-# Office-based access control
 allow if {
-    input.action == "read"
-    input.user.offices[_] == input.context.office_id
-}
-
-# Time-based embargo rules
-allow if {
-    not embargoed
-}
-
-# Check if data is embargoed
-embargoed if {
-    input.resource == "timeseries"
-    input.context.data_age_hours < 24
-    not "data_manager" in input.user.roles
-    not "system_admin" in input.user.roles
-}
-
-# Helper rules for debugging
-user_has_role[role] if {
-    role := input.user.roles[_]
-}
-
-user_in_office[office] if {
-    office := input.user.offices[_]
+    "hec_employee" in input.user.roles
 }

@@ -58,7 +58,7 @@ export default [
           'newlines-between': 'always',
         },
       ],
-      'newline-before-return': 'error',
+      'newline-before-return': 'off',
       'no-constant-binary-expression': 'error',
       'sort-imports': [
         'error',

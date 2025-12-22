@@ -1,16 +1,20 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import { decode } from 'jsonwebtoken';
 
-import { AuthorizationContext, User } from '../types/authorization';
-import { OPAService } from '../services/opa.service';
 import { getConfig } from '../config';
+import { ApiService } from '../services/api.service';
+import { OPAService } from '../services/opa.service';
+import { AuthorizationContext, User } from '../types/authorization';
 
 export class AuthorizationMiddleware {
   private opaService: OPAService;
+  private apiService: ApiService;
   private config: ReturnType<typeof getConfig>;
   private whitelistedEndpoints: string[];
 
   constructor(private fastify: FastifyInstance) {
     this.opaService = new OPAService(fastify);
+    this.apiService = new ApiService(fastify);
     this.config = getConfig(fastify);
 
     // Parse whitelist from config (JSON array string)
@@ -35,12 +39,26 @@ export class AuthorizationMiddleware {
     );
   }
 
-  /**
-   * Check if an endpoint requires OPA authorization based on whitelist
-   */
+  // Initialize the middleware (database connection, etc.)
+  async initialize(): Promise<void> {
+    try {
+      await this.apiService.initialize();
+      this.fastify.log.info('Authorization middleware initialized successfully');
+    } catch (error) {
+      this.fastify.log.error({ error }, 'Failed to initialize authorization middleware');
+      throw error;
+    }
+  }
+
+  // Close resources (API connections, cache, etc.)
+  async close(): Promise<void> {
+    await this.apiService.close();
+  }
+
+  // Check if an endpoint requires OPA authorization based on whitelist
   isWhitelisted(path: string): boolean {
     // Extract the full path without query parameters
-    // e.g., /cwms-data/timeseries?name=foo -> /cwms-data/timeseries
+    // e.g. /cwms-data/timeseries?name=foo -> /cwms-data/timeseries
     const cleanPath = path.split('?')[0];
 
     // Check if the path matches any whitelisted endpoint
@@ -49,8 +67,8 @@ export class AuthorizationMiddleware {
 
   async authorize(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
-      // Extract user from request (mock for now, will integrate with Keycloak later)
-      const user = this.extractUser(request);
+      // Extract user from request (database query or JWT token)
+      const user = await this.extractUser(request);
 
       // Build authorization context
       const context: AuthorizationContext = {
@@ -105,11 +123,10 @@ export class AuthorizationMiddleware {
     }
   }
 
-  private extractUser(request: FastifyRequest): User {
-    // For now, extract from headers (will integrate with Keycloak JWT later)
+  private async extractUser(request: FastifyRequest): Promise<User> {
     const headers = request.headers;
 
-    // Check for test/mock user in headers
+    // Check for test/mock user in headers (for development/testing)
     if (headers['x-test-user']) {
       try {
         const testUser = JSON.parse(headers['x-test-user'] as string);
@@ -120,25 +137,74 @@ export class AuthorizationMiddleware {
           email: testUser.email,
           roles: testUser.roles || [],
           offices: testUser.offices || [],
+          persona: testUser.persona,
+          authenticated: true,
         };
       } catch {
         this.fastify.log.warn('Invalid x-test-user header');
       }
     }
 
-    // Default mock user for testing
+    // Extract username from JWT Bearer token
+    let username: string | null = null;
+
+    if (headers.authorization && headers.authorization.startsWith('Bearer ')) {
+      try {
+        const token = headers.authorization.substring(7);
+        const decoded = decode(token) as any;
+
+        if (decoded && decoded.preferred_username) {
+          username = decoded.preferred_username;
+        } else if (decoded && decoded.sub) {
+          username = decoded.sub;
+        }
+
+        this.fastify.log.debug({ username, token: decoded }, 'Extracted username from JWT token');
+      } catch (error) {
+        this.fastify.log.warn({ error }, 'Failed to decode JWT token');
+      }
+    }
+
+    // Query API for user context if we have a username
+    if (username) {
+      try {
+        const bearerToken = headers.authorization;
+        const apiUser = await this.apiService.getUserContext(username, bearerToken);
+
+        if (apiUser) {
+          this.fastify.log.info(
+            {
+              username: apiUser.username,
+              office: apiUser.offices,
+              roles: apiUser.roles,
+              persona: apiUser.persona,
+            },
+            'User context loaded from API',
+          );
+
+          return apiUser;
+        } else {
+          this.fastify.log.warn({ username }, 'User not found in API, using default context');
+        }
+      } catch (error) {
+        this.fastify.log.error({ error, username }, 'Error querying user from API, using default context');
+      }
+    }
+
+    // Default user for public/unauthenticated access
     return {
-      id: 'default-user',
-      username: 'default-user',
-      email: 'user@example.com',
-      roles: ['viewer'],
-      offices: ['HQ'],
+      id: 'anonymous',
+      username: 'anonymous',
+      email: 'anonymous@example.com',
+      roles: [],
+      offices: [],
+      authenticated: false,
     };
   }
 
   private extractResource(request: FastifyRequest): string {
     // Extract resource from the path
-    // e.g., /cwms-data/timeseries -> timeseries
+    // e.g. /cwms-data/timeseries -> timeseries
     const pathParts = request.url.split('/').filter(Boolean);
 
     if (pathParts.length >= 2 && pathParts[0] === 'cwms-data') {
@@ -162,7 +228,6 @@ export class AuthorizationMiddleware {
   }
 
   private addAuthorizationHeaders(request: FastifyRequest, user: User, decision: any): void {
-    // Build the authorization context object per the latest specification
     const authContext = {
       policy: {
         allow: decision.allow,
@@ -174,15 +239,46 @@ export class AuthorizationMiddleware {
         email: user.email,
         roles: user.roles,
         offices: user.offices,
-        primary_office: user.offices?.[0] || 'HQ',
+        primary_office: user.primary_office || user.offices?.[0] || 'HQ',
+        persona: user.persona,
       },
-      constraints: decision.filters || {},
+      constraints: {
+        allowed_offices: this.getAllowedOffices(user),
+        embargo_rules: decision.constraints?.embargo_rules || null,
+        embargo_exempt: decision.constraints?.embargo_exempt || false,
+        time_window: decision.constraints?.time_window || null,
+        data_classification: this.getAllowedClassifications(user),
+        ...decision.filters,
+      },
       context: decision.context || {},
       timestamp: new Date().toISOString(),
     };
 
-    // Set the single authorization context header as JSON string
-    // This follows the industry standard pattern from our notes
     request.headers['x-cwms-auth-context'] = JSON.stringify(authContext);
+  }
+
+
+  private getAllowedOffices(user: User): string[] {
+    if (user.persona === 'automated_processor' || user.roles?.includes('system_admin')) {
+      return ['*'];
+    }
+
+    return user.offices || [];
+  }
+
+  private getAllowedClassifications(user: User): string[] {
+    if (user.roles?.includes('system_admin') || user.roles?.includes('hec_employee')) {
+      return ['public', 'internal', 'restricted', 'sensitive'];
+    }
+
+    if (user.persona === 'data_manager' || user.roles?.includes('water_manager')) {
+      return ['public', 'internal', 'restricted', 'sensitive'];
+    }
+
+    if (user.authenticated) {
+      return ['public', 'internal'];
+    }
+
+    return ['public'];
   }
 }

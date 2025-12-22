@@ -50,6 +50,14 @@ const schema = {
       type: 'string',
       default: '["/cwms-data/timeseries","/cwms-data/offices"]',
     },
+    CWMS_API_KEY: {
+      type: 'string',
+      default: '',
+    },
+    REDIS_URL: {
+      type: 'string',
+      default: 'redis://localhost:6379',
+    },
   },
 };
 
@@ -65,12 +73,14 @@ export interface Config {
   CACHE_TTL_SECONDS: string;
   CACHE_MAX_SIZE: string;
   OPA_WHITELIST_ENDPOINTS: string;
+  CWMS_API_KEY: string;
+  REDIS_URL: string;
 }
 
 export async function registerConfig(fastify: FastifyInstance): Promise<void> {
   await fastify.register(fastifyEnv, {
     schema,
-    dotenv: true, // Use fastify's built-in dotenv support
+    dotenv: true,
   });
 }
 

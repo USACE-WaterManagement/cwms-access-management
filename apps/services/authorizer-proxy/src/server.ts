@@ -35,6 +35,14 @@ async function buildServer() {
   // Create authorization middleware instance
   const authMiddleware = new AuthorizationMiddleware(fastify);
 
+  // Initialize middleware (database connection, etc.)
+  await authMiddleware.initialize();
+
+  // Register shutdown hook
+  fastify.addHook('onClose', async () => {
+    await authMiddleware.close();
+  });
+
   // Health check endpoint (no auth required)
   fastify.get('/health', async () => {
     return {
