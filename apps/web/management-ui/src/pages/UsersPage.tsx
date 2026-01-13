@@ -4,6 +4,7 @@ import { UsersIcon } from 'lucide-react';
 
 import { apiService } from '../services/api.service';
 import { Input } from '../components/ui/input';
+import { CopyableId } from '../components/CopyableId';
 
 export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -240,7 +241,7 @@ export default function UsersPage() {
                       </span>
                     </td>
                     <td className='px-6 py-4 whitespace-nowrap'>
-                      <div className='text-xs font-mono text-gray-400'>{user.id.substring(0, 8)}...</div>
+                      <CopyableId id={user.id} />
                     </td>
                   </tr>
                 ))}
