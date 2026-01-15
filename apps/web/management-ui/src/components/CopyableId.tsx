@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Check, Copy, X } from 'lucide-react';
 
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { cn } from '../lib/utils';
 
 interface CopyableIdProps {
@@ -59,26 +60,44 @@ export function CopyableId({ id, truncateLength = 8, className }: CopyableIdProp
     }
   };
 
+  const getTooltipContent = () => {
+    if (copyState === 'copied') {
+      return 'Copied!';
+    }
+
+    return 'Copy to clipboard';
+  };
+
   return (
-    <div
-      role='button'
-      tabIndex={0}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className={cn(
-        'inline-flex items-center gap-2 px-2 py-1 -mx-2 -my-1 rounded transition-colors duration-200',
-        'hover:bg-gray-50 cursor-pointer',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1',
-        className,
-      )}
-      aria-label='Copy user ID to clipboard'>
-      <span
-        className={cn('text-xs font-mono transition-colors duration-200', 'text-gray-500 group-hover:text-gray-700')}>
-        {truncatedId}
-      </span>
-      {getIcon()}
-    </div>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div
+          role='button'
+          tabIndex={0}
+          onClick={handleClick}
+          onKeyDown={handleKeyDown}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          className={cn(
+            'inline-flex items-center gap-2 px-2 py-1 -mx-2 -my-1 rounded transition-colors duration-200',
+            'hover:bg-gray-50 cursor-pointer',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1',
+            className,
+          )}
+          aria-label='Copy user ID to clipboard'>
+          <span
+            className={cn(
+              'text-xs font-mono transition-colors duration-200',
+              'text-gray-500 group-hover:text-gray-700',
+            )}>
+            {truncatedId}
+          </span>
+          {getIcon()}
+        </div>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p className='text-xs'>{getTooltipContent()}</p>
+      </TooltipContent>
+    </Tooltip>
   );
 }
