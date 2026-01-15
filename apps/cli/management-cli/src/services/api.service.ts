@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 
+import type { CreateRoleInput } from '../utils/validation';
 import { logger } from '../utils/logger';
 import { getConfig } from '../utils/config';
 
@@ -42,9 +43,6 @@ export class ApiService {
     this.client = axios.create({
       baseURL: this.baseUrl,
       timeout: 10000,
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
 
     this.client.interceptors.request.use((config) => {
@@ -156,6 +154,64 @@ export class ApiService {
       return response.data.data;
     } catch (error) {
       logger.error({ error, id }, 'Failed to get policy');
+      throw error;
+    }
+  }
+
+  async createRole(roleData: CreateRoleInput): Promise<Role> {
+    try {
+      const response = await this.client.post<ApiResponse<Role>>('/roles', roleData);
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.error || 'Failed to create role');
+      }
+
+      logger.debug({ roleId: response.data.data.id, name: response.data.data.name }, 'Role created successfully');
+
+      return response.data.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 409) {
+          throw new Error('Role name already exists');
+        }
+
+        if (error.response?.status === 400) {
+          const details = error.response.data?.details;
+
+          if (details && Array.isArray(details)) {
+            const messages = details.map((d: any) => `${d.field}: ${d.message}`).join(', ');
+
+            throw new Error(`Validation error: ${messages}`);
+          }
+
+          throw new Error(error.response.data?.error || 'Invalid role data');
+        }
+      }
+
+      logger.error({ error, name: roleData.name }, 'Failed to create role');
+
+      throw error;
+    }
+  }
+
+  async deleteRole(id: string): Promise<void> {
+    try {
+      const response = await this.client.delete<ApiResponse<void>>(`/roles/${id}`);
+
+      if (!response.data.success) {
+        throw new Error(response.data.error || 'Failed to delete role');
+      }
+
+      logger.debug({ roleId: id }, 'Role deleted successfully');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 404) {
+          throw new Error('Role not found');
+        }
+      }
+
+      logger.error({ error, id }, 'Failed to delete role');
+
       throw error;
     }
   }

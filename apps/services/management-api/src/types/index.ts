@@ -29,3 +29,8 @@ export interface ApiResponse<T> {
   error?: string;
   message?: string;
 }
+
+export interface CreateRoleRequest {
+  name: string;
+  description?: string;
+}

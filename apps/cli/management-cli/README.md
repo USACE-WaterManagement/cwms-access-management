@@ -169,7 +169,31 @@ cwms-admin roles list
 Show role details:
 
 ```bash
-cwms-admin roles show <role>
+cwms-admin roles show <role-id>
+```
+
+Add a new role (interactive prompts):
+
+```bash
+cwms-admin roles add
+```
+
+Add a new role (with flags):
+
+```bash
+cwms-admin roles add -n <role_name> -d "<description>"
+```
+
+Remove a role:
+
+```bash
+cwms-admin roles remove <role-id>
+```
+
+Remove a role (skip confirmation prompt):
+
+```bash
+cwms-admin roles remove <role-id> -y
 ```
 
 ### Policies
@@ -229,7 +253,7 @@ The API URL is set during login with the `-a` flag (defaults to `http://localhos
 
 - Authentication (login, logout with token storage)
 - User management (list, show)
-- Role management (list, show)
+- Role management (list, show, create, delete)
 - Policy management (list, show)
 - Formatted table output with box-drawing characters
 - Structured logging with Pino
