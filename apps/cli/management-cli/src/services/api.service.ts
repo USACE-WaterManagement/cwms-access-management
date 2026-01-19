@@ -166,7 +166,7 @@ export class ApiService {
         throw new Error(response.data.error || 'Failed to create user');
       }
 
-      logger.info(
+      logger.debug(
         { userId: response.data.data.id, username: response.data.data.username },
         'User created successfully',
       );
@@ -205,7 +205,7 @@ export class ApiService {
         throw new Error(response.data.error || 'Failed to delete user');
       }
 
-      logger.info({ userId: id }, 'User deleted successfully');
+      logger.debug({ userId: id }, 'User deleted successfully');
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 404) {
