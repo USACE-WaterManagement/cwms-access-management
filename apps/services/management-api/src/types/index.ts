@@ -34,3 +34,11 @@ export interface CreateRoleRequest {
   name: string;
   description?: string;
 }
+  
+export interface CreateUserRequest {
+  username: string;
+  email: string;
+  password: string;
+  name: string;
+  enabled?: boolean;
+}

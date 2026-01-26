@@ -111,6 +111,7 @@ cwms-admin users list
 You can run commands in two ways:
 
 1. **Direct executable** (from monorepo root):
+
    ```bash
    ./dist/apps/cli/management-cli/index.js <command>
    ```
@@ -120,7 +121,8 @@ You can run commands in two ways:
    cwms-admin <command>
    ```
 
-Examples below use the global command format. Replace `cwms-admin` with `./dist/apps/cli/management-cli/index.js` if not installed globally.
+Examples below use the global command format. Replace `cwms-admin` with `./dist/apps/cli/management-cli/index.js` if not
+installed globally.
 
 ### Authentication
 
@@ -153,9 +155,35 @@ cwms-admin users list
 Show user details:
 
 ```bash
-cwms-admin users show <username>
+cwms-admin users show <user-id>
 # or
-./dist/apps/cli/management-cli/index.js users show <username>
+./dist/apps/cli/management-cli/index.js users show <user-id>
+```
+
+Add a new user (interactive prompts):
+
+```bash
+cwms-admin users add
+# or
+./dist/apps/cli/management-cli/index.js users add
+```
+
+Add a new user (with flags):
+
+```bash
+cwms-admin users add -u <username> -e <email> -p <password> -n "<full-name>"
+```
+
+Remove a user:
+
+```bash
+cwms-admin users remove <user-id>
+```
+
+Remove a user (skip confirmation prompt):
+
+```bash
+cwms-admin users remove <user-id> -y
 ```
 
 ### Roles
@@ -252,7 +280,7 @@ The API URL is set during login with the `-a` flag (defaults to `http://localhos
 ## Features
 
 - Authentication (login, logout with token storage)
-- User management (list, show)
+- User management (list, show, create, delete)
 - Role management (list, show, create, delete)
 - Policy management (list, show)
 - Formatted table output with box-drawing characters
