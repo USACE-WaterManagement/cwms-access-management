@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import { logger } from '../utils/logger.js';
-import type { CreateUserRequest, Role, User } from '../types/index.js';
+import type { CreateRoleRequest, CreateUserRequest, Role, User } from '../types/index.js';
 
 export class KeycloakService {
   private keycloakUrl: string;
@@ -37,7 +37,7 @@ export class KeycloakService {
     }
   }
 
-  private parseName(name: string): { firstName: string; lastName: string } {
+ private parseName(name: string): { firstName: string; lastName: string } {
     const trimmed = name.trim();
     const spaceIndex = trimmed.indexOf(' ');
 
@@ -51,7 +51,7 @@ export class KeycloakService {
     };
   }
 
-  async getUsers(): Promise<User[]> {
+async getUsers(): Promise<User[]> {
     try {
       const token = await this.getAdminToken();
       const response = await axios.get(
@@ -249,4 +249,150 @@ export class KeycloakService {
       throw new Error('Failed to delete user');
     }
   }
+  
+   async getRoles(): Promise<Role[]> {
+    try {
+      const token = await this.getAdminToken();
+      const response = await axios.get(`${this.keycloakUrl}/admin/realms/${this.realm}/roles`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return response.data.map((role: any) => ({
+        id: role.id,
+        name: role.name,
+        description: role.description,
+      }));
+    } catch (error) {
+      logger.error({ error }, 'Failed to fetch roles from Keycloak');
+
+      throw new Error('Failed to fetch roles');
+    }
+  }
+
+  async getRole(id: string): Promise<Role | null> {
+    try {
+      const token = await this.getAdminToken();
+      const response = await axios.get(`${this.keycloakUrl}/admin/realms/${this.realm}/roles-by-id/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const role = response.data;
+
+      return {
+        id: role.id,
+        name: role.name,
+        description: role.description,
+      };
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        return null;
+      }
+      logger.error({ error, id }, 'Failed to fetch role from Keycloak');
+
+      throw new Error('Failed to fetch role');
+    }
+  }
+
+  async getRoleByName(name: string): Promise<Role | null> {
+    try {
+      const token = await this.getAdminToken();
+      const response = await axios.get(
+        `${this.keycloakUrl}/admin/realms/${this.realm}/roles/${encodeURIComponent(name)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const role = response.data;
+
+      return {
+        id: role.id,
+        name: role.name,
+        description: role.description,
+      };
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        return null;
+      }
+
+      logger.error({ error, name }, 'Failed to fetch role by name from Keycloak');
+
+      throw new Error('Failed to fetch role');
+    }
+  }
+
+  async createRole(roleData: CreateRoleRequest): Promise<Role> {
+    try {
+      const token = await this.getAdminToken();
+
+      const keycloakRole: { name: string; description?: string } = {
+        name: roleData.name,
+      };
+
+      if (roleData.description && roleData.description.trim() !== '') {
+        keycloakRole.description = roleData.description;
+      }
+
+      await axios.post(`${this.keycloakUrl}/admin/realms/${this.realm}/roles`, keycloakRole, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      logger.info({ name: roleData.name }, 'Role created in Keycloak');
+
+      const createdRole = await this.getRoleByName(roleData.name);
+
+      if (!createdRole) {
+        throw new Error('Failed to fetch created role');
+      }
+
+      return createdRole;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 409) {
+          throw new Error('Role name already exists');
+        }
+
+        if (error.response?.status === 400) {
+          throw new Error(error.response.data?.errorMessage || 'Invalid role data');
+        }
+      }
+
+      logger.error({ error, name: roleData.name }, 'Failed to create role in Keycloak');
+
+      throw new Error('Failed to create role');
+    }
+  }
+
+  async deleteRole(id: string): Promise<void> {
+    try {
+      const token = await this.getAdminToken();
+
+      await axios.delete(`${this.keycloakUrl}/admin/realms/${this.realm}/roles-by-id/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      logger.info({ roleId: id }, 'Role deleted from Keycloak');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 404) {
+          throw new Error('Role not found');
+        }
+      }
+
+      logger.error({ error, id }, 'Failed to delete role from Keycloak');
+
+      throw new Error('Failed to delete role');
+    }
+  }
+
 }

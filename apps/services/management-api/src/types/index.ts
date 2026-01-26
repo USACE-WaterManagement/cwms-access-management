@@ -30,6 +30,11 @@ export interface ApiResponse<T> {
   message?: string;
 }
 
+export interface CreateRoleRequest {
+  name: string;
+  description?: string;
+}
+  
 export interface CreateUserRequest {
   username: string;
   email: string;
