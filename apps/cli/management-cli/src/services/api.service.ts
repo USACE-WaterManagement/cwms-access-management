@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 
+import type { CreateUserInput } from '../utils/validation';
 import { logger } from '../utils/logger';
 import { getConfig } from '../utils/config';
 
@@ -42,9 +43,6 @@ export class ApiService {
     this.client = axios.create({
       baseURL: this.baseUrl,
       timeout: 10000,
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
 
     this.client.interceptors.request.use((config) => {
@@ -156,6 +154,67 @@ export class ApiService {
       return response.data.data;
     } catch (error) {
       logger.error({ error, id }, 'Failed to get policy');
+      throw error;
+    }
+  }
+
+  async createUser(userData: CreateUserInput): Promise<User> {
+    try {
+      const response = await this.client.post<ApiResponse<User>>('/users', userData);
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.error || 'Failed to create user');
+      }
+
+      logger.debug(
+        { userId: response.data.data.id, username: response.data.data.username },
+        'User created successfully',
+      );
+
+      return response.data.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 409) {
+          throw new Error('Username or email already exists');
+        }
+
+        if (error.response?.status === 400) {
+          const details = error.response.data?.details;
+
+          if (details && Array.isArray(details)) {
+            const messages = details.map((d: any) => `${d.field}: ${d.message}`).join(', ');
+
+            throw new Error(`Validation error: ${messages}`);
+          }
+
+          throw new Error(error.response.data?.error || 'Invalid user data');
+        }
+      }
+
+      logger.error({ error, username: userData.username }, 'Failed to create user');
+
+      throw error;
+    }
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    try {
+      const response = await this.client.delete<ApiResponse<void>>(`/users/${id}`);
+
+      if (!response.data.success) {
+        throw new Error(response.data.error || 'Failed to delete user');
+      }
+
+      logger.debug({ userId: id }, 'User deleted successfully');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 404) {
+          throw new Error('User not found');
+        }
+      }
+
+      logger.error({ error, id }, 'Failed to delete user');
+
       throw error;
     }
   }
