@@ -37,7 +37,7 @@ export class KeycloakService {
     }
   }
 
- private parseName(name: string): { firstName: string; lastName: string } {
+  private parseName(name: string): { firstName: string; lastName: string } {
     const trimmed = name.trim();
     const spaceIndex = trimmed.indexOf(' ');
 
@@ -51,17 +51,14 @@ export class KeycloakService {
     };
   }
 
-async getUsers(): Promise<User[]> {
+  async getUsers(): Promise<User[]> {
     try {
       const token = await this.getAdminToken();
-      const response = await axios.get(
-        `${this.keycloakUrl}/admin/realms/${this.realm}/users`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await axios.get(`${this.keycloakUrl}/admin/realms/${this.realm}/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       return response.data.map((user: any) => ({
         id: user.id,
@@ -81,14 +78,11 @@ async getUsers(): Promise<User[]> {
   async getUser(id: string): Promise<User | null> {
     try {
       const token = await this.getAdminToken();
-      const response = await axios.get(
-        `${this.keycloakUrl}/admin/realms/${this.realm}/users/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await axios.get(`${this.keycloakUrl}/admin/realms/${this.realm}/users/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       const user = response.data;
 
@@ -113,14 +107,11 @@ async getUsers(): Promise<User[]> {
   async getRoles(): Promise<Role[]> {
     try {
       const token = await this.getAdminToken();
-      const response = await axios.get(
-        `${this.keycloakUrl}/admin/realms/${this.realm}/roles`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await axios.get(`${this.keycloakUrl}/admin/realms/${this.realm}/roles`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       return response.data.map((role: any) => ({
         id: role.id,
@@ -137,14 +128,11 @@ async getUsers(): Promise<User[]> {
   async getRole(id: string): Promise<Role | null> {
     try {
       const token = await this.getAdminToken();
-      const response = await axios.get(
-        `${this.keycloakUrl}/admin/realms/${this.realm}/roles-by-id/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await axios.get(`${this.keycloakUrl}/admin/realms/${this.realm}/roles-by-id/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       const role = response.data;
 
@@ -249,53 +237,6 @@ async getUsers(): Promise<User[]> {
       throw new Error('Failed to delete user');
     }
   }
-  
-   async getRoles(): Promise<Role[]> {
-    try {
-      const token = await this.getAdminToken();
-      const response = await axios.get(`${this.keycloakUrl}/admin/realms/${this.realm}/roles`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      return response.data.map((role: any) => ({
-        id: role.id,
-        name: role.name,
-        description: role.description,
-      }));
-    } catch (error) {
-      logger.error({ error }, 'Failed to fetch roles from Keycloak');
-
-      throw new Error('Failed to fetch roles');
-    }
-  }
-
-  async getRole(id: string): Promise<Role | null> {
-    try {
-      const token = await this.getAdminToken();
-      const response = await axios.get(`${this.keycloakUrl}/admin/realms/${this.realm}/roles-by-id/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const role = response.data;
-
-      return {
-        id: role.id,
-        name: role.name,
-        description: role.description,
-      };
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        return null;
-      }
-      logger.error({ error, id }, 'Failed to fetch role from Keycloak');
-
-      throw new Error('Failed to fetch role');
-    }
-  }
 
   async getRoleByName(name: string): Promise<Role | null> {
     try {
@@ -394,5 +335,4 @@ async getUsers(): Promise<User[]> {
       throw new Error('Failed to delete role');
     }
   }
-
 }
