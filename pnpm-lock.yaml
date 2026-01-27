@@ -152,51 +152,6 @@ importers:
         specifier: ^4.19.2
         version: 4.20.5
 
-  apps/cli/management-cli/dist/apps/cli/management-cli:
-    dependencies:
-      '@types/prompts':
-        specifier: 2.4.9
-        version: 2.4.9
-      '@types/react':
-        specifier: 18.3.26
-        version: 18.3.26
-      axios:
-        specifier: ^1.7.7
-        version: 1.12.2
-      chalk:
-        specifier: ^5.3.0
-        version: 5.6.2
-      commander:
-        specifier: ^12.1.0
-        version: 12.1.0
-      ink:
-        specifier: ^5.2.1
-        version: 5.2.1(@types/react@18.3.26)(react-devtools-core@packages+react-devtools-core)(react@18.3.1)
-      ora:
-        specifier: ^8.1.1
-        version: 8.2.0
-      pino:
-        specifier: ^10.0.0
-        version: 10.0.0
-      pino-pretty:
-        specifier: ^13.0.0
-        version: 13.1.1
-      prompts:
-        specifier: ^2.4.2
-        version: 2.4.2
-      react:
-        specifier: ^18.3.1
-        version: 18.3.1
-      react-devtools-core:
-        specifier: workspace:^4.28.0
-        version: link:../../../../../../../packages/react-devtools-core
-      react-reconciler:
-        specifier: ^0.29.2
-        version: 0.29.2(react@18.3.1)
-      zod:
-        specifier: ^3.23.8
-        version: 3.25.76
-
   apps/services/authorizer-proxy:
     dependencies:
       '@aws-sdk/client-secrets-manager':
