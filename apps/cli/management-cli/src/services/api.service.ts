@@ -3,6 +3,7 @@ import axios, { AxiosInstance } from 'axios';
 import type { CreateRoleInput, CreateUserInput } from '../utils/validation';
 import { logger } from '../utils/logger';
 import { getConfig } from '../utils/config';
+import { CLI_NAME } from '../constants/app';
 
 export interface User {
   id: string;
@@ -59,8 +60,8 @@ export class ApiService {
       (response) => response,
       (error) => {
         if (axios.isAxiosError(error) && error.response?.status === 401) {
-          logger.error('Authentication required. Please run: cwms-admin login');
-          throw new Error('Not authenticated. Please run: cwms-admin login');
+          logger.error(`Authentication required. Please run: ${CLI_NAME} login`);
+          throw new Error(`Not authenticated. Please run: ${CLI_NAME} login`);
         }
         logger.error({ error }, 'API request failed');
         throw error;

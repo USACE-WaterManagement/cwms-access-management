@@ -2,13 +2,15 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 
+import { CONFIG_DIR_NAME } from '../constants/app';
+
 interface Config {
   token?: string;
   username?: string;
   apiUrl?: string;
 }
 
-const CONFIG_DIR = join(homedir(), '.cwms-admin');
+const CONFIG_DIR = join(homedir(), CONFIG_DIR_NAME);
 const CONFIG_FILE = join(CONFIG_DIR, 'config.json');
 
 export function getConfig(): Config {

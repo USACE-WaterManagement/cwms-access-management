@@ -7,11 +7,12 @@ import { rolesCommand } from './commands/roles';
 import { policiesCommand } from './commands/policies';
 import { logger } from './utils/logger';
 import { getVersion } from './utils/version';
+import { CLI_NAME } from './constants/app';
 
 const program = new Command();
 
 program
-  .name('cwms-admin')
+  .name(CLI_NAME)
   .description('CWMS Access Management CLI')
   .version(getVersion());
 
