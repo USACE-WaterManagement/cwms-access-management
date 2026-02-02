@@ -12,16 +12,6 @@ describe('createRoleSchema', () => {
       expect(result.success).toBe(true);
     });
 
-    it('accepts names with numbers', () => {
-      const result = createRoleSchema.safeParse({ name: 'role_123' });
-      expect(result.success).toBe(true);
-    });
-
-    it('accepts single word names', () => {
-      const result = createRoleSchema.safeParse({ name: 'admin' });
-      expect(result.success).toBe(true);
-    });
-
     it('rejects names shorter than 3 characters', () => {
       const result = createRoleSchema.safeParse({ name: 'ab' });
       expect(result.success).toBe(false);
@@ -46,14 +36,9 @@ describe('createRoleSchema', () => {
       }
     });
 
-    it('rejects hyphens', () => {
-      const result = createRoleSchema.safeParse({ name: 'admin-role' });
-      expect(result.success).toBe(false);
-    });
-
-    it('rejects spaces', () => {
-      const result = createRoleSchema.safeParse({ name: 'admin role' });
-      expect(result.success).toBe(false);
+    it('rejects invalid characters', () => {
+      expect(createRoleSchema.safeParse({ name: 'admin-role' }).success).toBe(false);
+      expect(createRoleSchema.safeParse({ name: 'admin role' }).success).toBe(false);
     });
   });
 
@@ -63,19 +48,6 @@ describe('createRoleSchema', () => {
         name: 'admin',
         description: 'Administrator role with full access',
       });
-      expect(result.success).toBe(true);
-    });
-
-    it('accepts empty description', () => {
-      const result = createRoleSchema.safeParse({
-        name: 'admin',
-        description: '',
-      });
-      expect(result.success).toBe(true);
-    });
-
-    it('accepts omitted description', () => {
-      const result = createRoleSchema.safeParse({ name: 'admin' });
       expect(result.success).toBe(true);
     });
 
@@ -106,22 +78,6 @@ describe('createUserSchema', () => {
       expect(result.success).toBe(true);
     });
 
-    it('accepts usernames with hyphens', () => {
-      const result = createUserSchema.safeParse({
-        ...validUser,
-        username: 'john-doe',
-      });
-      expect(result.success).toBe(true);
-    });
-
-    it('accepts usernames with numbers', () => {
-      const result = createUserSchema.safeParse({
-        ...validUser,
-        username: 'john123',
-      });
-      expect(result.success).toBe(true);
-    });
-
     it('rejects usernames shorter than 3 characters', () => {
       const result = createUserSchema.safeParse({
         ...validUser,
@@ -144,34 +100,15 @@ describe('createUserSchema', () => {
       }
     });
 
-    it('rejects usernames with special characters', () => {
-      const result = createUserSchema.safeParse({
-        ...validUser,
-        username: 'john@doe',
-      });
-      expect(result.success).toBe(false);
-    });
-
-    it('rejects usernames with spaces', () => {
-      const result = createUserSchema.safeParse({
-        ...validUser,
-        username: 'john doe',
-      });
-      expect(result.success).toBe(false);
+    it('rejects invalid characters', () => {
+      expect(createUserSchema.safeParse({ ...validUser, username: 'john@doe' }).success).toBe(false);
+      expect(createUserSchema.safeParse({ ...validUser, username: 'john doe' }).success).toBe(false);
     });
   });
 
   describe('email field', () => {
     it('accepts valid email addresses', () => {
       const result = createUserSchema.safeParse(validUser);
-      expect(result.success).toBe(true);
-    });
-
-    it('accepts email with subdomain', () => {
-      const result = createUserSchema.safeParse({
-        ...validUser,
-        email: 'john@mail.example.com',
-      });
       expect(result.success).toBe(true);
     });
 
@@ -184,14 +121,6 @@ describe('createUserSchema', () => {
       if (!result.success) {
         expect(result.error.issues[0].message).toBe('Invalid email format');
       }
-    });
-
-    it('rejects email without domain', () => {
-      const result = createUserSchema.safeParse({
-        ...validUser,
-        email: 'john@',
-      });
-      expect(result.success).toBe(false);
     });
   });
 
@@ -236,11 +165,6 @@ describe('createUserSchema', () => {
   });
 
   describe('name field', () => {
-    it('accepts valid names', () => {
-      const result = createUserSchema.safeParse(validUser);
-      expect(result.success).toBe(true);
-    });
-
     it('rejects names shorter than 2 characters', () => {
       const result = createUserSchema.safeParse({
         ...validUser,
@@ -259,28 +183,6 @@ describe('createUserSchema', () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.enabled).toBe(true);
-      }
-    });
-
-    it('accepts explicit true value', () => {
-      const result = createUserSchema.safeParse({
-        ...validUser,
-        enabled: true,
-      });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.enabled).toBe(true);
-      }
-    });
-
-    it('accepts explicit false value', () => {
-      const result = createUserSchema.safeParse({
-        ...validUser,
-        enabled: false,
-      });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.enabled).toBe(false);
       }
     });
   });

@@ -1,16 +1,8 @@
-import type { FastifyInstance, FastifyRequest } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 
 import type { CdaService } from '../services/cda.service.js';
-import { createRoleSchema, validateRequest } from '../middleware/validation.js';
+import { extractAuthToken } from '../utils/auth.utils.js';
 import { logger } from '../utils/logger.js';
-
-function extractAuthToken(request: FastifyRequest): string | undefined {
-  const authHeader = request.headers.authorization;
-  if (authHeader?.startsWith('Bearer ')) {
-    return authHeader.substring(7);
-  }
-  return undefined;
-}
 
 export async function rolesRoutes(fastify: FastifyInstance, cdaService: CdaService) {
   fastify.get('/roles', async (request, reply) => {
@@ -59,57 +51,17 @@ export async function rolesRoutes(fastify: FastifyInstance, cdaService: CdaServi
     }
   });
 
-  fastify.post(
-    '/roles',
-    {
-      preHandler: validateRequest(createRoleSchema),
-    },
-    async (request, reply) => {
-      try {
-        await cdaService.createRole();
-        return reply.status(501).send({
-          success: false,
-          error: 'Role creation is not supported via CWMS Data API',
-        });
-      } catch (error) {
-        logger.error({ error }, 'Failed to create role');
+  fastify.post('/roles', async (_request, reply) => {
+    return reply.status(501).send({
+      success: false,
+      error: 'Role creation is not supported via CWMS Data API. Use CWMS security procedures directly.',
+    });
+  });
 
-        if (error instanceof Error && error.message.includes('not supported')) {
-          return reply.status(501).send({
-            success: false,
-            error: error.message,
-          });
-        }
-
-        return reply.status(500).send({
-          success: false,
-          error: 'Failed to create role',
-        });
-      }
-    },
-  );
-
-  fastify.delete('/roles/:id', async (request, reply) => {
-    try {
-      await cdaService.deleteRole();
-      return reply.status(501).send({
-        success: false,
-        error: 'Role deletion is not supported via CWMS Data API',
-      });
-    } catch (error) {
-      logger.error({ error }, 'Failed to delete role');
-
-      if (error instanceof Error && error.message.includes('not supported')) {
-        return reply.status(501).send({
-          success: false,
-          error: error.message,
-        });
-      }
-
-      return reply.status(500).send({
-        success: false,
-        error: 'Failed to delete role',
-      });
-    }
+  fastify.delete('/roles/:id', async (_request, reply) => {
+    return reply.status(501).send({
+      success: false,
+      error: 'Role deletion is not supported via CWMS Data API. Use CWMS security procedures directly.',
+    });
   });
 }

@@ -1,16 +1,8 @@
-import type { FastifyInstance, FastifyRequest } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 
 import type { CdaService } from '../services/cda.service.js';
+import { extractAuthToken } from '../utils/auth.utils.js';
 import { logger } from '../utils/logger.js';
-import { createUserSchema, validateRequest } from '../middleware/validation.js';
-
-function extractAuthToken(request: FastifyRequest): string | undefined {
-  const authHeader = request.headers.authorization;
-  if (authHeader?.startsWith('Bearer ')) {
-    return authHeader.substring(7);
-  }
-  return undefined;
-}
 
 export async function usersRoutes(
   fastify: FastifyInstance,
@@ -62,57 +54,17 @@ export async function usersRoutes(
     }
   });
 
-  fastify.post(
-    '/users',
-    {
-      preHandler: validateRequest(createUserSchema),
-    },
-    async (request, reply) => {
-      try {
-        await cdaService.createUser();
-        return reply.status(501).send({
-          success: false,
-          error: 'User creation is not supported via CWMS Data API',
-        });
-      } catch (error) {
-        logger.error({ error }, 'Failed to create user');
+  fastify.post('/users', async (_request, reply) => {
+    return reply.status(501).send({
+      success: false,
+      error: 'User creation is not supported via CWMS Data API. Use CWMS security procedures directly.',
+    });
+  });
 
-        if (error instanceof Error && error.message.includes('not supported')) {
-          return reply.status(501).send({
-            success: false,
-            error: error.message,
-          });
-        }
-
-        return reply.status(500).send({
-          success: false,
-          error: 'Failed to create user',
-        });
-      }
-    },
-  );
-
-  fastify.delete('/users/:id', async (request, reply) => {
-    try {
-      await cdaService.deleteUser();
-      return reply.status(501).send({
-        success: false,
-        error: 'User deletion is not supported via CWMS Data API',
-      });
-    } catch (error) {
-      logger.error({ error }, 'Failed to delete user');
-
-      if (error instanceof Error && error.message.includes('not supported')) {
-        return reply.status(501).send({
-          success: false,
-          error: error.message,
-        });
-      }
-
-      return reply.status(500).send({
-        success: false,
-        error: 'Failed to delete user',
-      });
-    }
+  fastify.delete('/users/:id', async (_request, reply) => {
+    return reply.status(501).send({
+      success: false,
+      error: 'User deletion is not supported via CWMS Data API. Use CWMS security procedures directly.',
+    });
   });
 }

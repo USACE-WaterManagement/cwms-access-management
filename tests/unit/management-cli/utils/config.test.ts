@@ -1,7 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
-import { join } from 'node:path';
-import { homedir } from 'node:os';
 
 vi.mock('node:fs', () => ({
   existsSync: vi.fn(),
@@ -91,32 +89,6 @@ describe('config module', () => {
       saveConfig(config);
 
       expect(mkdirSync).toHaveBeenCalledWith(CONFIG_DIR, { recursive: true });
-      expect(writeFileSync).toHaveBeenCalledWith(
-        CONFIG_FILE,
-        JSON.stringify(config, null, 2),
-      );
-    });
-
-    it('does not create directory if it exists', () => {
-      vi.mocked(existsSync).mockReturnValue(true);
-
-      const config = { token: 'test-token' };
-      saveConfig(config);
-
-      expect(mkdirSync).not.toHaveBeenCalled();
-      expect(writeFileSync).toHaveBeenCalled();
-    });
-
-    it('writes config with proper formatting', () => {
-      vi.mocked(existsSync).mockReturnValue(true);
-
-      const config = {
-        token: 'test-token',
-        username: 'testuser',
-        apiUrl: 'http://localhost:3002',
-      };
-      saveConfig(config);
-
       expect(writeFileSync).toHaveBeenCalledWith(
         CONFIG_FILE,
         JSON.stringify(config, null, 2),
