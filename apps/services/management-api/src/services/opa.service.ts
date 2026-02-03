@@ -15,7 +15,11 @@ export class OpaService {
       const response = await axios.get(`${this.opaUrl}/v1/policies`);
       const policies = (response.data.result || []).map((policy: Policy) => ({
         id: policy.id,
-        name: policy.id,
+        name:
+          policy.id
+            .split('/')
+            .pop()
+            ?.replace(/\.rego$/, '') || policy.id,
         description: `Policy: ${policy.id}`,
         rules: policy,
       }));
@@ -38,7 +42,11 @@ export class OpaService {
 
       return {
         id,
-        name: id,
+        name:
+          id
+            .split('/')
+            .pop()
+            ?.replace(/\.rego$/, '') || id,
         description: `Policy: ${id}`,
         rules: response.data.result,
       };
