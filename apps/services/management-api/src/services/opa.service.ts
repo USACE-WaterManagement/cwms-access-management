@@ -13,14 +13,12 @@ export class OpaService {
   async getPolicies(): Promise<Policy[]> {
     try {
       const response = await axios.get(`${this.opaUrl}/v1/policies`);
-      const policies = Object.entries(response.data.result || {}).map(
-        ([id, data]: [string, any]) => ({
-          id,
-          name: id,
-          description: `Policy: ${id}`,
-          rules: data,
-        }),
-      );
+      const policies = (response.data.result || []).map((policy: Policy) => ({
+        id: policy.id,
+        name: policy.id,
+        description: `Policy: ${policy.id}`,
+        rules: policy,
+      }));
 
       return policies;
     } catch (error) {
