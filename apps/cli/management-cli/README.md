@@ -235,7 +235,7 @@ cwms-admin policies list
 Show policy details:
 
 ```bash
-cwms-admin policies show <name>
+cwms-admin policies show <policy-id>
 ```
 
 ### Global Options
