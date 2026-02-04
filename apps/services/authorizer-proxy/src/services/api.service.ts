@@ -1,8 +1,16 @@
 import { FastifyInstance } from 'fastify';
 
 import { getConfig } from '../config';
-import { User } from '../types/authorization';
+import { User, TsGroupPrivilege } from '../types/authorization';
 import { CacheService } from './cache.service';
+import { apiCallDuration, apiCallsTotal } from './metrics.service';
+
+interface CwmsApiTsGroupPrivilege {
+  'ts-group-code': number;
+  'ts-group-id': string;
+  privilege: string;
+  'embargo-hours': number;
+}
 
 interface CwmsApiUser {
   'user-name': string;
@@ -10,6 +18,7 @@ interface CwmsApiUser {
   email: string;
   'cac-auth'?: boolean;
   roles?: Record<string, string[]>;
+  'ts-group-privileges'?: CwmsApiTsGroupPrivilege[];
 }
 
 export class ApiService {
@@ -45,6 +54,9 @@ export class ApiService {
       return cached;
     }
 
+    const endpointLabel = bearerToken ? 'user_profile' : 'users';
+    const endTimer = apiCallDuration.startTimer({ endpoint: endpointLabel });
+
     try {
       const headers: Record<string, string> = {
         Accept: 'application/json',
@@ -69,6 +81,9 @@ export class ApiService {
       });
 
       if (!response.ok) {
+        endTimer({ status: response.status.toString() });
+        apiCallsTotal.inc({ endpoint: endpointLabel, status: response.status.toString() });
+
         if (response.status === 401) {
           this.fastify.log.warn({ username, status: response.status }, 'User not authenticated');
           return null;
@@ -87,6 +102,9 @@ export class ApiService {
         return null;
       }
 
+      endTimer({ status: '200' });
+      apiCallsTotal.inc({ endpoint: endpointLabel, status: '200' });
+
       const apiUser: CwmsApiUser = await response.json();
 
       const allRoles: string[] = [];
@@ -101,6 +119,13 @@ export class ApiService {
 
       const primaryOffice = offices.length > 0 ? offices[0] : undefined;
 
+      const tsPrivileges: TsGroupPrivilege[] = (apiUser['ts-group-privileges'] || []).map((p) => ({
+        ts_group_code: p['ts-group-code'],
+        ts_group_id: p['ts-group-id'],
+        privilege: p.privilege as TsGroupPrivilege['privilege'],
+        embargo_hours: p['embargo-hours'],
+      }));
+
       const user: User = {
         id: apiUser['user-name'],
         username: apiUser['user-name'],
@@ -109,6 +134,7 @@ export class ApiService {
         offices: Array.from(new Set(offices)),
         primary_office: primaryOffice,
         authenticated: true,
+        ts_privileges: tsPrivileges.length > 0 ? tsPrivileges : undefined,
       };
 
       this.fastify.log.debug(
@@ -117,6 +143,7 @@ export class ApiService {
           offices: user.offices,
           roles: user.roles,
           roleCount: user.roles.length,
+          tsGroupCount: tsPrivileges.length,
         },
         'User context retrieved from API',
       );
@@ -125,6 +152,9 @@ export class ApiService {
 
       return user;
     } catch (error) {
+      endTimer({ status: 'error' });
+      apiCallsTotal.inc({ endpoint: endpointLabel, status: 'error' });
+
       if (error instanceof Error && error.name === 'AbortError') {
         this.fastify.log.error({ username }, 'API request timeout');
       } else {
