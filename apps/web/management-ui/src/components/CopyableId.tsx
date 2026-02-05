@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Check, Copy, X } from 'lucide-react';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import { cn } from '../lib/utils';
+import { cn } from '@utils/cn';
 
 interface CopyableIdProps {
   id: string;
