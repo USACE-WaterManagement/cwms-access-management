@@ -9,6 +9,7 @@ import data.cwms.personas.data_manager
 import data.cwms.personas.automated_collector
 import data.cwms.personas.automated_processor
 import data.cwms.personas.external_cooperator
+import data.cwms.personas.viewer_users
 import future.keywords.contains
 import future.keywords.if
 import future.keywords.in
@@ -41,6 +42,10 @@ allow if {
 
 allow if {
     external_cooperator.allow
+}
+
+allow if {
+    viewer_users.allow
 }
 
 allow if {
