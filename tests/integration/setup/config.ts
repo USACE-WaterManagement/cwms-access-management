@@ -18,22 +18,34 @@ export const config = {
   },
   testUsers: {
     damOperator: {
+      username: 'damop001',
+      password: 'damop001',
+      expectedOffice: 'SPK',
+      expectedRoles: ['dam_operator', 'CWMS Users', 'All Users', 'TS ID Creator'],
+    },
+    waterManager: {
       username: 'm5hectest',
       password: 'm5hectest',
       expectedOffice: 'SWT',
-      expectedRoles: ['dam_operator', 'CWMS Users', 'All Users'],
-    },
-    waterManager: {
-      username: 'l2hectest.1234567890',
-      password: 'l2hectest',
-      expectedOffice: 'SPK',
       expectedRoles: ['water_manager', 'CWMS Users', 'All Users', 'TS ID Creator'],
     },
-    viewerUser: {
+    dataManager: {
+      username: 'datamgr001',
+      password: 'datamgr001',
+      expectedOffice: 'SWT',
+      expectedRoles: ['data_manager', 'CWMS Users', 'All Users', 'TS ID Creator'],
+    },
+    limitedUser: {
       username: 'l1hectest',
       password: 'l1hectest',
       expectedOffice: 'SPL',
-      expectedRoles: ['Viewer Users'],
+      expectedRoles: ['public_user', 'All Users'],
+    },
+    generalUser: {
+      username: 'l2hectest',
+      password: 'l2hectest',
+      expectedOffice: 'SPK',
+      expectedRoles: ['CWMS Users', 'All Users', 'TS ID Creator'],
     },
   },
   timeouts: {
