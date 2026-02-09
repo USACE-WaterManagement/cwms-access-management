@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
+import { managementApiRequest } from '../helpers/http.js';
+import { config } from '../setup/config.js';
 
-import { config } from '../setup/config';
-
-const MANAGEMENT_API_URL = config.managementApi.url;
 const TEST_USER = config.testUsers.damOperator;
 
 interface LoginResponse {
@@ -38,26 +37,25 @@ describe('Management API Authentication', () => {
   let refreshToken: string;
 
   beforeAll(async () => {
-    const healthResponse = await fetch(`${MANAGEMENT_API_URL}/health`);
+    const healthResponse = await managementApiRequest('/health');
     if (!healthResponse.ok) {
-      throw new Error(`Management API is not available at ${MANAGEMENT_API_URL}`);
+      throw new Error(`Management API is not available at ${config.managementApi.url}`);
     }
   });
 
   describe('POST /login', () => {
     it('returns tokens for valid credentials', async () => {
-      const response = await fetch(`${MANAGEMENT_API_URL}/login`, {
+      const response = await managementApiRequest('/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        body: {
           username: TEST_USER.username,
           password: TEST_USER.password,
-        }),
+        },
       });
 
       expect(response.status).toBe(200);
 
-      const data: LoginResponse = await response.json();
+      const data = response.data as LoginResponse;
       expect(data.success).toBe(true);
       expect(data.data).toBeDefined();
       expect(data.data?.access_token).toBeDefined();
@@ -71,46 +69,43 @@ describe('Management API Authentication', () => {
     });
 
     it('returns 400 for missing username', async () => {
-      const response = await fetch(`${MANAGEMENT_API_URL}/login`, {
+      const response = await managementApiRequest('/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: 'somepassword' }),
+        body: { password: 'somepassword' },
       });
 
       expect(response.status).toBe(400);
 
-      const data: LoginResponse = await response.json();
+      const data = response.data as LoginResponse;
       expect(data.success).toBe(false);
       expect(data.error).toContain('required');
     });
 
     it('returns 400 for missing password', async () => {
-      const response = await fetch(`${MANAGEMENT_API_URL}/login`, {
+      const response = await managementApiRequest('/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: 'someuser' }),
+        body: { username: 'someuser' },
       });
 
       expect(response.status).toBe(400);
 
-      const data: LoginResponse = await response.json();
+      const data = response.data as LoginResponse;
       expect(data.success).toBe(false);
       expect(data.error).toContain('required');
     });
 
     it('returns 401 for invalid credentials', async () => {
-      const response = await fetch(`${MANAGEMENT_API_URL}/login`, {
+      const response = await managementApiRequest('/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        body: {
           username: TEST_USER.username,
           password: 'wrongpassword',
-        }),
+        },
       });
 
       expect(response.status).toBe(401);
 
-      const data: LoginResponse = await response.json();
+      const data = response.data as LoginResponse;
       expect(data.success).toBe(false);
     });
   });
@@ -119,15 +114,14 @@ describe('Management API Authentication', () => {
     it('returns new tokens for valid refresh token', async () => {
       expect(refreshToken).toBeDefined();
 
-      const response = await fetch(`${MANAGEMENT_API_URL}/refresh`, {
+      const response = await managementApiRequest('/refresh', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh_token: refreshToken }),
+        body: { refresh_token: refreshToken },
       });
 
       expect(response.status).toBe(200);
 
-      const data: RefreshResponse = await response.json();
+      const data = response.data as RefreshResponse;
       expect(data.success).toBe(true);
       expect(data.data).toBeDefined();
       expect(data.data?.access_token).toBeDefined();
@@ -137,44 +131,41 @@ describe('Management API Authentication', () => {
     });
 
     it('returns 400 for missing refresh_token', async () => {
-      const response = await fetch(`${MANAGEMENT_API_URL}/refresh`, {
+      const response = await managementApiRequest('/refresh', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
+        body: {},
       });
 
       expect(response.status).toBe(400);
 
-      const data: RefreshResponse = await response.json();
+      const data = response.data as RefreshResponse;
       expect(data.success).toBe(false);
       expect(data.error).toContain('required');
     });
 
     it('returns 401 for invalid refresh token', async () => {
-      const response = await fetch(`${MANAGEMENT_API_URL}/refresh`, {
+      const response = await managementApiRequest('/refresh', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh_token: 'invalid-token' }),
+        body: { refresh_token: 'invalid-token' },
       });
 
       expect(response.status).toBe(401);
 
-      const data: RefreshResponse = await response.json();
+      const data = response.data as RefreshResponse;
       expect(data.success).toBe(false);
     });
   });
 
   describe('POST /logout', () => {
     it('returns 400 for missing refresh_token', async () => {
-      const response = await fetch(`${MANAGEMENT_API_URL}/logout`, {
+      const response = await managementApiRequest('/logout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
+        body: {},
       });
 
       expect(response.status).toBe(400);
 
-      const data: LogoutResponse = await response.json();
+      const data = response.data as LogoutResponse;
       expect(data.success).toBe(false);
       expect(data.error).toContain('required');
     });
@@ -182,23 +173,21 @@ describe('Management API Authentication', () => {
     it('successfully logs out with valid refresh token', async () => {
       expect(refreshToken).toBeDefined();
 
-      const response = await fetch(`${MANAGEMENT_API_URL}/logout`, {
+      const response = await managementApiRequest('/logout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh_token: refreshToken }),
+        body: { refresh_token: refreshToken },
       });
 
       expect(response.status).toBe(200);
 
-      const data: LogoutResponse = await response.json();
+      const data = response.data as LogoutResponse;
       expect(data.success).toBe(true);
     });
 
     it('refresh token is invalidated after logout', async () => {
-      const response = await fetch(`${MANAGEMENT_API_URL}/refresh`, {
+      const response = await managementApiRequest('/refresh', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh_token: refreshToken }),
+        body: { refresh_token: refreshToken },
       });
 
       expect(response.status).toBe(401);
@@ -207,36 +196,34 @@ describe('Management API Authentication', () => {
 
   describe('Protected endpoints', () => {
     it('can access protected endpoint with valid token', async () => {
-      const loginResponse = await fetch(`${MANAGEMENT_API_URL}/login`, {
+      const loginResponse = await managementApiRequest('/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        body: {
           username: TEST_USER.username,
           password: TEST_USER.password,
-        }),
+        },
       });
 
-      const loginData: LoginResponse = await loginResponse.json();
+      const loginData = loginResponse.data as LoginResponse;
       const token = loginData.data?.access_token;
 
-      const response = await fetch(`${MANAGEMENT_API_URL}/roles`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await managementApiRequest('/roles', {
+        token,
       });
 
+      // Token is accepted (not 401), CDA may return 403 for non-admin users
       expect(response.status).not.toBe(401);
     });
 
     it('returns 401 for protected endpoint without token', async () => {
-      const response = await fetch(`${MANAGEMENT_API_URL}/roles`);
-
+      const response = await managementApiRequest('/roles');
       expect(response.status).toBe(401);
     });
 
     it('returns 401 for protected endpoint with invalid token', async () => {
-      const response = await fetch(`${MANAGEMENT_API_URL}/roles`, {
-        headers: { Authorization: 'Bearer invalid-token' },
+      const response = await managementApiRequest('/roles', {
+        token: 'invalid-token',
       });
-
       expect(response.status).toBe(401);
     });
   });
