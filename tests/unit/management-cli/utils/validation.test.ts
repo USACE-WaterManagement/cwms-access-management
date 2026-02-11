@@ -15,25 +15,19 @@ describe('createRoleSchema', () => {
     it('rejects names shorter than 3 characters', () => {
       const result = createRoleSchema.safeParse({ name: 'ab' });
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Role name must be at least 3 characters');
-      }
+      expect(result.error?.issues[0].message).toBe('Role name must be at least 3 characters');
     });
 
     it('rejects names longer than 50 characters', () => {
       const result = createRoleSchema.safeParse({ name: 'a'.repeat(51) });
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Role name must be at most 50 characters');
-      }
+      expect(result.error?.issues[0].message).toBe('Role name must be at most 50 characters');
     });
 
     it('rejects uppercase letters', () => {
       const result = createRoleSchema.safeParse({ name: 'Admin_Role' });
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toContain('snake_case');
-      }
+      expect(result.error?.issues[0].message).toContain('snake_case');
     });
 
     it('rejects invalid characters', () => {
@@ -57,9 +51,7 @@ describe('createRoleSchema', () => {
         description: 'a'.repeat(501),
       });
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Description must not exceed 500 characters');
-      }
+      expect(result.error?.issues[0].message).toBe('Description must not exceed 500 characters');
     });
   });
 });
@@ -84,9 +76,7 @@ describe('createUserSchema', () => {
         username: 'ab',
       });
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Username must be at least 3 characters');
-      }
+      expect(result.error?.issues[0].message).toBe('Username must be at least 3 characters');
     });
 
     it('rejects usernames longer than 30 characters', () => {
@@ -95,9 +85,7 @@ describe('createUserSchema', () => {
         username: 'a'.repeat(31),
       });
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Username must be at most 30 characters');
-      }
+      expect(result.error?.issues[0].message).toBe('Username must be at most 30 characters');
     });
 
     it('rejects invalid characters', () => {
@@ -118,9 +106,7 @@ describe('createUserSchema', () => {
         email: 'invalid-email',
       });
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Invalid email format');
-      }
+      expect(result.error?.issues[0].message).toBe('Invalid email format');
     });
   });
 
@@ -136,9 +122,7 @@ describe('createUserSchema', () => {
         password: 'Pass1',
       });
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Password must be at least 8 characters');
-      }
+      expect(result.error?.issues[0].message).toBe('Password must be at least 8 characters');
     });
 
     it('rejects passwords without letters', () => {
@@ -147,9 +131,7 @@ describe('createUserSchema', () => {
         password: '12345678',
       });
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues.some((i) => i.message.includes('letter'))).toBe(true);
-      }
+      expect(result.error?.issues.some((i) => i.message.includes('letter'))).toBe(true);
     });
 
     it('rejects passwords without numbers', () => {
@@ -158,9 +140,7 @@ describe('createUserSchema', () => {
         password: 'Password',
       });
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues.some((i) => i.message.includes('number'))).toBe(true);
-      }
+      expect(result.error?.issues.some((i) => i.message.includes('number'))).toBe(true);
     });
   });
 
@@ -171,9 +151,7 @@ describe('createUserSchema', () => {
         name: 'J',
       });
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Name must be at least 2 characters');
-      }
+      expect(result.error?.issues[0].message).toBe('Name must be at least 2 characters');
     });
   });
 
@@ -181,9 +159,7 @@ describe('createUserSchema', () => {
     it('defaults to true when omitted', () => {
       const result = createUserSchema.safeParse(validUser);
       expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.enabled).toBe(true);
-      }
+      expect(result.data?.enabled).toBe(true);
     });
   });
 });

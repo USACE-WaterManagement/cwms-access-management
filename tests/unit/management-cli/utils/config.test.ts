@@ -12,8 +12,8 @@ vi.mock('node:os', () => ({
   homedir: vi.fn(() => '/mock/home'),
 }));
 
-const CONFIG_DIR = '/mock/home/.cwms-admin';
-const CONFIG_FILE = '/mock/home/.cwms-admin/config.json';
+const CONFIG_DIR = '/mock/home/.cwms-swims-admin';
+const CONFIG_FILE = '/mock/home/.cwms-swims-admin/config.json';
 
 describe('config module', () => {
   let getConfig: typeof import('../../../../apps/cli/management-cli/src/utils/config').getConfig;
