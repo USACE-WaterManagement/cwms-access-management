@@ -212,7 +212,7 @@ cd dist/apps/cli/management-cli
 npm link
 
 # Now run from anywhere
-cwms-admin users list
+cwms-swims-admin users list
 ```
 
 ## Development Workflow

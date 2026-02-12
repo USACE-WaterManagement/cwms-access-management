@@ -1,6 +1,6 @@
 # CWMS Admin CLI - Distribution Guide
 
-This guide covers how to build and distribute the cwms-admin CLI tool to your users.
+This guide covers how to build and distribute the cwms-swims-admin CLI tool to your users.
 
 ## Prerequisites
 
@@ -20,8 +20,8 @@ Run the automated build script:
 
 This creates distribution packages in the `./release/` directory:
 
-- `cwms-admin-v{version}-{os}-{arch}.tar.gz` - Platform-specific tarball
-- `cwms-admin-v{version}-portable.zip` - Cross-platform ZIP archive
+- `cwms-swims-admin-v{version}-{os}-{arch}.tar.gz` - Platform-specific tarball
+- `cwms-swims-admin-v{version}-portable.zip` - Cross-platform ZIP archive
 
 ### Manual Build Steps
 
@@ -41,7 +41,7 @@ sed -i 's/"react-devtools-core": "workspace:\^4.28.0"/"react-devtools-core": "^4
 npm install --omit=dev
 
 # 5. Create tarball
-tar -czf cwms-admin.tar.gz index.js package.json node_modules
+tar -czf cwms-swims-admin.tar.gz index.js package.json node_modules
 ```
 
 ## Distribution Methods
@@ -56,58 +56,58 @@ cd dist/apps/cli/management-cli
 npm publish --access public
 
 # Option B: Share the dist folder directly
-zip -r cwms-admin-npm.zip dist/apps/cli/management-cli
+zip -r cwms-swims-admin-npm.zip dist/apps/cli/management-cli
 ```
 
 **User Installation:**
 
 ```bash
 # From npm registry
-npm install -g @usace/cwms-admin
+npm install -g @usace-watermanagement/cwms-swims-admin
 
 # From local folder/archive
-npm install -g ./cwms-admin-npm
+npm install -g ./cwms-swims-admin-npm
 ```
 
 **User Usage:**
 
 ```bash
-cwms-admin --version
-cwms-admin --help
-cwms-admin users list
+cwms-swims-admin --version
+cwms-swims-admin --help
+cwms-swims-admin users list
 ```
 
 ### Method 2: Portable Archive
 
 **Distribution:** Share the generated tarball or zip file:
 
-- `release/cwms-admin-v0.1.0-darwin-arm64.tar.gz` (Mac ARM)
-- `release/cwms-admin-v0.1.0-portable.zip` (All platforms)
+- `release/cwms-swims-admin-v0.1.0-darwin-arm64.tar.gz` (Mac ARM)
+- `release/cwms-swims-admin-v0.1.0-portable.zip` (All platforms)
 
 **User Installation (Linux/Mac):**
 
 ```bash
 # Extract archive
-tar -xzf cwms-admin-v0.1.0-*.tar.gz
+tar -xzf cwms-swims-admin-v0.1.0-*.tar.gz
 
 # Run the installation script
 chmod +x install-from-archive.sh
 ./install-from-archive.sh
 
 # Or manual installation
-sudo mkdir -p /usr/local/lib/cwms-admin
-sudo cp -r index.js package.json node_modules /usr/local/lib/cwms-admin/
-sudo ln -s /usr/local/lib/cwms-admin/index.js /usr/local/bin/cwms-admin
-sudo chmod +x /usr/local/bin/cwms-admin
+sudo mkdir -p /usr/local/lib/cwms-swims-admin
+sudo cp -r index.js package.json node_modules /usr/local/lib/cwms-swims-admin/
+sudo ln -s /usr/local/lib/cwms-swims-admin/index.js /usr/local/bin/cwms-swims-admin
+sudo chmod +x /usr/local/bin/cwms-swims-admin
 ```
 
 **User Installation (Windows):**
 
 ```powershell
-# Extract ZIP to C:\Program Files\cwms-admin
+# Extract ZIP to C:\Program Files\cwms-swims-admin
 # Add to PATH or create a batch wrapper:
 @echo off
-node "C:\Program Files\cwms-admin\index.js" %*
+node "C:\Program Files\cwms-swims-admin\index.js" %*
 ```
 
 ## Package Contents
@@ -115,7 +115,7 @@ node "C:\Program Files\cwms-admin\index.js" %*
 Each distribution package includes:
 
 ```text
-cwms-admin/
+cwms-swims-admin/
 ├── index.js           # 34KB bundled application (ESM format)
 ├── package.json       # Package metadata and dependencies
 └── node_modules/      # Production dependencies (~8-10MB)
@@ -137,7 +137,7 @@ Update version before building:
 ```bash
 # In apps/cli/management-cli/package.json
 {
-  "name": "@usace/cwms-admin",
+  "name": "@usace-watermanagement/cwms-swims-admin",
   "version": "0.2.0",  # Update this
   ...
 }
@@ -149,15 +149,15 @@ Before distributing, test the package:
 
 ```bash
 # Test tarball extraction
-tar -xzf release/cwms-admin-*.tar.gz -C /tmp/test
+tar -xzf release/cwms-swims-admin-*.tar.gz -C /tmp/test
 cd /tmp/test
 node index.js --version
 node index.js users list
 
 # Test npm installation
 npm install -g ./dist/apps/cli/management-cli
-cwms-admin --help
-npm uninstall -g @usace/cwms-admin
+cwms-swims-admin --help
+npm uninstall -g @usace-watermanagement/cwms-swims-admin
 ```
 
 ## User System Requirements
@@ -176,7 +176,7 @@ npm uninstall -g @usace/cwms-admin
 
 ## Troubleshooting
 
-### "command not found: cwms-admin"
+### "command not found: cwms-swims-admin"
 
 **Solution:** Add npm global bin directory to PATH:
 
@@ -193,7 +193,7 @@ export PATH="$PATH:$(npm bin -g)"
 **Solution:** Dependencies not installed. Run:
 
 ```bash
-cd /path/to/cwms-admin
+cd /path/to/cwms-swims-admin
 npm install --omit=dev
 ```
 

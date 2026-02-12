@@ -5,8 +5,9 @@ import { KeycloakAuthService } from '../services/keycloak-auth.service.js';
 const KEYCLOAK_URL = process.env.KEYCLOAK_URL || 'http://localhost:8080/auth';
 const KEYCLOAK_REALM = process.env.KEYCLOAK_REALM || 'cwms';
 const KEYCLOAK_CLIENT_ID = process.env.KEYCLOAK_CLIENT_ID || 'cwms';
+const KEYCLOAK_ISSUER_URL = process.env.KEYCLOAK_ISSUER_URL || KEYCLOAK_URL;
 
-const keycloakAuthService = new KeycloakAuthService(KEYCLOAK_URL, KEYCLOAK_REALM, KEYCLOAK_CLIENT_ID);
+const keycloakAuthService = new KeycloakAuthService(KEYCLOAK_URL, KEYCLOAK_REALM, KEYCLOAK_CLIENT_ID, KEYCLOAK_ISSUER_URL);
 
 export interface AuthUser {
   sub: string;

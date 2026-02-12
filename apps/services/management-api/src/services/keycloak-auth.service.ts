@@ -25,12 +25,14 @@ interface DecodedToken {
 
 export class KeycloakAuthService {
   private keycloakUrl: string;
+  private issuerUrl: string;
   private realm: string;
   private clientId: string;
   private jwksClient: jwksClient.JwksClient;
 
-  constructor(keycloakUrl: string, realm: string = 'cwms', clientId: string = 'cwms') {
+  constructor(keycloakUrl: string, realm: string = 'cwms', clientId: string = 'cwms', issuerUrl?: string) {
     this.keycloakUrl = keycloakUrl;
+    this.issuerUrl = issuerUrl || keycloakUrl;
     this.realm = realm;
     this.clientId = clientId;
 
@@ -144,7 +146,7 @@ export class KeycloakAuthService {
 
       const verified = jwt.verify(token, publicKey, {
         algorithms: ['RS256'],
-        issuer: `${this.keycloakUrl}/realms/${this.realm}`,
+        issuer: `${this.issuerUrl}/realms/${this.realm}`,
       }) as DecodedToken;
 
       return verified;
