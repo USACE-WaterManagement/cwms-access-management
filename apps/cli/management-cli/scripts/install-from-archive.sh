@@ -5,10 +5,12 @@
 
 set -e
 
-INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/lib/cwms-admin}"
+CLI_NAME=$(node -p "Object.keys(require('./package.json').bin)[0]")
+
+INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/lib/${CLI_NAME}}"
 BIN_DIR="${BIN_DIR:-$HOME/.local/bin}"
 
-echo "Installing cwms-admin CLI..."
+echo "Installing ${CLI_NAME} CLI..."
 echo ""
 
 # Create directories
@@ -20,22 +22,22 @@ echo "Copying files to $INSTALL_DIR..."
 cp -r index.js package.json node_modules "$INSTALL_DIR/"
 
 # Create executable wrapper
-cat > "$BIN_DIR/cwms-admin" << 'EOF'
+cat > "$BIN_DIR/${CLI_NAME}" << EOF
 #!/bin/bash
-NODE_PATH="$HOME/.local/lib/cwms-admin/node_modules" exec node "$HOME/.local/lib/cwms-admin/index.js" "$@"
+NODE_PATH="$INSTALL_DIR/node_modules" exec node "$INSTALL_DIR/index.js" "\$@"
 EOF
 
-chmod +x "$BIN_DIR/cwms-admin"
+chmod +x "$BIN_DIR/${CLI_NAME}"
 
 echo ""
 echo "Installation complete!"
 echo ""
-echo "The 'cwms-admin' command has been installed to: $BIN_DIR/cwms-admin"
+echo "The '${CLI_NAME}' command has been installed to: $BIN_DIR/${CLI_NAME}"
 echo ""
-echo "If you can't run 'cwms-admin' directly, add this to your ~/.bashrc or ~/.zshrc:"
+echo "If you can't run '${CLI_NAME}' directly, add this to your ~/.bashrc or ~/.zshrc:"
 echo "  export PATH=\"\$PATH:$BIN_DIR\""
 echo ""
 echo "Test the installation:"
-echo "  cwms-admin --version"
-echo "  cwms-admin --help"
+echo "  ${CLI_NAME} --version"
+echo "  ${CLI_NAME} --help"
 echo ""

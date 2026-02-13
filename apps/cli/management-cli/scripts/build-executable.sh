@@ -5,7 +5,9 @@
 
 set -e
 
-echo "Building standalone executable for cwms-admin..."
+CLI_NAME=$(node -p "Object.keys(require('./apps/cli/management-cli/package.json').bin)[0]")
+
+echo "Building standalone executable for ${CLI_NAME}..."
 echo ""
 
 # Step 1: Prepare distribution
@@ -28,18 +30,18 @@ echo ""
 echo "Step 3: Creating distributable archives..."
 
 # Create tarball for Linux/Mac
-tar -czf ../../../../release/cwms-admin-v$(node -p "require('./package.json').version")-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m).tar.gz \
+tar -czf ../../../../release/${CLI_NAME}-v$(node -p "require('./package.json').version")-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m).tar.gz \
     index.js package.json node_modules
 
-echo "  Created: release/cwms-admin-v$(node -p "require('./package.json').version")-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m).tar.gz"
+echo "  Created: release/${CLI_NAME}-v$(node -p "require('./package.json').version")-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m).tar.gz"
 
 # Create zip for Windows compatibility
 cd ../../../..
 cd dist/apps/cli/management-cli
-zip -q -r ../../../../release/cwms-admin-v$(node -p "require('./package.json').version")-portable.zip \
+zip -q -r ../../../../release/${CLI_NAME}-v$(node -p "require('./package.json').version")-portable.zip \
     index.js package.json node_modules
 
-echo "  Created: release/cwms-admin-v$(node -p "require('./package.json').version")-portable.zip"
+echo "  Created: release/${CLI_NAME}-v$(node -p "require('./package.json').version")-portable.zip"
 
 cd ../../../..
 
@@ -51,10 +53,10 @@ echo ""
 echo "1. NPM Installation (requires Node.js on target machine):"
 echo "   npm install -g ./dist/apps/cli/management-cli"
 echo "   # or"
-echo "   npm install -g @usace/cwms-admin"
+echo "   npm install -g @usace-watermanagement/${CLI_NAME}"
 echo ""
 echo "2. Manual Installation from archive:"
-echo "   tar -xzf release/cwms-admin-*.tar.gz -C /usr/local/lib/cwms-admin"
-echo "   ln -s /usr/local/lib/cwms-admin/index.js /usr/local/bin/cwms-admin"
-echo "   chmod +x /usr/local/bin/cwms-admin"
+echo "   tar -xzf release/${CLI_NAME}-*.tar.gz -C /usr/local/lib/${CLI_NAME}"
+echo "   ln -s /usr/local/lib/${CLI_NAME}/index.js /usr/local/bin/${CLI_NAME}"
+echo "   chmod +x /usr/local/bin/${CLI_NAME}"
 echo ""

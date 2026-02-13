@@ -3,6 +3,7 @@ import { createClient, RedisClientType } from 'redis';
 
 import { User } from '../types/authorization';
 import { getConfig } from '../config';
+import { cacheOperationDuration, cacheHitsTotal, cacheMissesTotal } from './metrics.service';
 
 export class CacheService {
   private client: RedisClientType | null = null;
@@ -54,18 +55,25 @@ export class CacheService {
       return null;
     }
 
+    const endTimer = cacheOperationDuration.startTimer({ operation: 'get' });
+
     try {
       const cacheKey = this.buildCacheKey(username);
       const cached = await this.client.get(cacheKey);
 
       if (cached) {
+        endTimer({ result: 'hit' });
+        cacheHitsTotal.inc({ cache_type: 'user_context' });
         this.fastify.log.debug({ username, cacheKey }, 'User context found in cache');
         return JSON.parse(cached) as User;
       }
 
+      endTimer({ result: 'miss' });
+      cacheMissesTotal.inc({ cache_type: 'user_context' });
       this.fastify.log.debug({ username, cacheKey }, 'User context not found in cache');
       return null;
     } catch (error) {
+      endTimer({ result: 'error' });
       this.fastify.log.error({ error, username }, 'Error retrieving user context from cache');
       return null;
     }
@@ -76,10 +84,13 @@ export class CacheService {
       return;
     }
 
+    const endTimer = cacheOperationDuration.startTimer({ operation: 'set' });
+
     try {
       const cacheKey = this.buildCacheKey(username);
       await this.client.setEx(cacheKey, this.TTL_SECONDS, JSON.stringify(user));
 
+      endTimer({ result: 'success' });
       this.fastify.log.debug(
         {
           username,
@@ -89,6 +100,7 @@ export class CacheService {
         'User context stored in cache',
       );
     } catch (error) {
+      endTimer({ result: 'error' });
       this.fastify.log.error({ error, username }, 'Error storing user context in cache');
     }
   }

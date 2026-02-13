@@ -11,6 +11,7 @@ allow if {
     input.action == "read"
     input.resource in ["timeseries", "measurements", "levels", "gates", "locations"]
     offices.user_can_access_office(input.user, input.context.office_id)
+    not time_rules.data_under_ts_group_embargo(input.context, input.user)
 }
 
 allow if {

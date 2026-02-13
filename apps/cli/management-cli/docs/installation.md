@@ -9,25 +9,25 @@ The CWMS Admin CLI tool helps you manage users, roles, and authorization policie
 If you have Node.js installed:
 
 ```bash
-npm install -g @usace/cwms-admin
+npm install -g @usace-watermanagement/cwms-swims-admin
 ```
 
 ### Option 2: Download and Install
 
 1. Download the appropriate file for your system:
-   - **Mac (Apple Silicon)**: `cwms-admin-v0.1.0-darwin-arm64.tar.gz`
-   - **Mac (Intel)**: `cwms-admin-v0.1.0-darwin-x64.tar.gz`
-   - **Linux**: `cwms-admin-v0.1.0-linux-x64.tar.gz`
-   - **Any platform**: `cwms-admin-v0.1.0-portable.zip`
+   - **Mac (Apple Silicon)**: `cwms-swims-admin-v0.1.0-darwin-arm64.tar.gz`
+   - **Mac (Intel)**: `cwms-swims-admin-v0.1.0-darwin-x64.tar.gz`
+   - **Linux**: `cwms-swims-admin-v0.1.0-linux-x64.tar.gz`
+   - **Any platform**: `cwms-swims-admin-v0.1.0-portable.zip`
 
 2. Extract the archive:
 
    ```bash
    # For .tar.gz files
-   tar -xzf cwms-admin-v0.1.0-*.tar.gz
+   tar -xzf cwms-swims-admin-v0.1.0-*.tar.gz
 
    # For .zip files
-   unzip cwms-admin-v0.1.0-portable.zip
+   unzip cwms-swims-admin-v0.1.0-portable.zip
    ```
 
 3. Run the installer:
@@ -55,30 +55,30 @@ After installation, verify it works:
 
 ```bash
 # Check version
-cwms-admin --version
+cwms-swims-admin --version
 
 # View available commands
-cwms-admin --help
+cwms-swims-admin --help
 
 # Login to the system
-cwms-admin login -u admin -p your-password
+cwms-swims-admin login -u admin -p your-password
 
 # List users
-cwms-admin users list
+cwms-swims-admin users list
 
 # View user details
-cwms-admin users show username
+cwms-swims-admin users show username
 
 # List roles
-cwms-admin roles list
+cwms-swims-admin roles list
 
 # View policies
-cwms-admin policies list
+cwms-swims-admin policies list
 ```
 
 ## Configuration
 
-The CLI stores its configuration in `~/.cwms-admin/config.json`
+The CLI stores its configuration in `~/.cwms-swims-admin/config.json`
 
 Example configuration:
 
@@ -93,7 +93,7 @@ Example configuration:
 
 ### Command not found
 
-If you see "command not found: cwms-admin", add npm's global bin directory to your PATH:
+If you see "command not found: cwms-swims-admin", add npm's global bin directory to your PATH:
 
 ```bash
 # Add to ~/.bashrc or ~/.zshrc
@@ -113,7 +113,7 @@ npm config set prefix ~/.npm-global
 export PATH=~/.npm-global/bin:$PATH
 
 # Then reinstall
-npm install -g @usace/cwms-admin
+npm install -g @usace-watermanagement/cwms-swims-admin
 ```
 
 ### Cannot connect to API
@@ -122,10 +122,10 @@ Check your configuration:
 
 ```bash
 # View current config
-cat ~/.cwms-admin/config.json
+cat ~/.cwms-swims-admin/config.json
 
 # Update API URL
-cwms-admin login -u admin -p password -a http://your-api-url:3001
+cwms-swims-admin login -u admin -p password -a http://your-api-url:3001
 ```
 
 ## Uninstallation
@@ -133,14 +133,14 @@ cwms-admin login -u admin -p password -a http://your-api-url:3001
 ### If installed via npm
 
 ```bash
-npm uninstall -g @usace/cwms-admin
+npm uninstall -g @usace-watermanagement/cwms-swims-admin
 ```
 
 ### If installed manually
 
 ```bash
-rm -rf ~/.local/lib/cwms-admin
-rm ~/.local/bin/cwms-admin
+rm -rf ~/.local/lib/cwms-swims-admin
+rm ~/.local/bin/cwms-swims-admin
 ```
 
 ## Support
@@ -148,7 +148,7 @@ rm ~/.local/bin/cwms-admin
 For help or bug reports:
 
 - GitHub Issues: <https://github.com/solidlogix/cwms-access-management/issues>
-- Documentation: <https://docs.solidlogix.com/cwms-admin>>
+- Documentation: <https://docs.solidlogix.com/cwms-swims-admin>>
 - Email: <support@solidlogix.com>
 
 ## Version History

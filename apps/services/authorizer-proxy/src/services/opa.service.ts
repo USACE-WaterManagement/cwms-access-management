@@ -3,6 +3,12 @@ import { FastifyInstance } from 'fastify';
 
 import { AuthorizationContext, AuthorizationDecision, OPARequest, OPAResponse } from '../types/authorization';
 import { getConfig } from '../config';
+import {
+  opaEvaluationDuration,
+  opaEvaluationsTotal,
+  opaCacheHitsTotal,
+  opaCacheMissesTotal,
+} from './metrics.service';
 
 export class OPAService {
   private client: AxiosInstance;
@@ -36,9 +42,13 @@ export class OPAService {
     const cached = this.cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.cacheTTL) {
       this.fastify.log.debug({ cacheKey }, 'Using cached authorization decision');
+      opaCacheHitsTotal.inc();
 
       return cached.decision;
     }
+
+    opaCacheMissesTotal.inc();
+    const endTimer = opaEvaluationDuration.startTimer({ resource: context.resource, action: context.action });
 
     try {
       // Build OPA request
@@ -52,6 +62,9 @@ export class OPAService {
             path: context.path,
             query: context.query || {},
             timestamp: context.timestamp.toISOString(),
+            office_id: context.office_id,
+            data_source: context.data_source,
+            classification: context.query?.classification,
           },
         },
       };
@@ -69,6 +82,10 @@ export class OPAService {
         filters: typeof result === 'object' ? result?.filters : undefined,
         context: typeof result === 'object' ? result?.headers : undefined,
       };
+
+      const decisionLabel = decision.allow ? 'allow' : 'deny';
+      endTimer({ decision: decisionLabel });
+      opaEvaluationsTotal.inc({ resource: context.resource, action: context.action, decision: decisionLabel });
 
       // Cache the decision
       this.cache.set(cacheKey, {
@@ -88,6 +105,8 @@ export class OPAService {
 
       return decision;
     } catch (error) {
+      endTimer({ decision: 'error' });
+      opaEvaluationsTotal.inc({ resource: context.resource, action: context.action, decision: 'error' });
       this.fastify.log.error({ error, context }, 'OPA authorization failed');
 
       // In case of OPA failure, we can either:

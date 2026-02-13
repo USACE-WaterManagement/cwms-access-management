@@ -1,6 +1,7 @@
 package cwms.personas.automated_processor
 
 import data.cwms.helpers.offices
+import data.cwms.helpers.time_rules
 import future.keywords.contains
 import future.keywords.if
 import future.keywords.in
@@ -10,6 +11,7 @@ allow if {
     input.action == "read"
     input.resource == "timeseries"
     input.context.data_source in ["AUTOMATED", "MANUAL"]
+    not time_rules.data_under_ts_group_embargo(input.context, input.user)
 }
 
 allow if {

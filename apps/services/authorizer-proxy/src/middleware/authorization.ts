@@ -4,7 +4,7 @@ import { decode } from 'jsonwebtoken';
 import { getConfig } from '../config';
 import { ApiService } from '../services/api.service';
 import { OPAService } from '../services/opa.service';
-import { AuthorizationContext, User } from '../types/authorization';
+import { AuthorizationContext, AuthorizeRequest, AuthorizeResponse, User } from '../types/authorization';
 
 export class AuthorizationMiddleware {
   private opaService: OPAService;
@@ -80,6 +80,8 @@ export class AuthorizationMiddleware {
         query: request.query as Record<string, any>,
         headers: request.headers as Record<string, string>,
         timestamp: new Date(),
+        office_id: (request.query as any).office_id || (request.query as any).office,
+        data_source: (request.query as any).data_source,
       };
 
       // Check with OPA
@@ -121,6 +123,153 @@ export class AuthorizationMiddleware {
         message: 'Authorization processing failed',
       });
     }
+  }
+
+  async authorizeRequest(authRequest: AuthorizeRequest): Promise<AuthorizeResponse> {
+    let user: User;
+
+    if (authRequest.jwt_token) {
+      user = await this.extractUserFromToken(authRequest.jwt_token);
+    } else if (authRequest.user) {
+      user = {
+        id: authRequest.user.id || authRequest.user.username || 'unknown',
+        username: authRequest.user.username || 'unknown',
+        roles: authRequest.user.roles || [],
+        offices: authRequest.user.offices || [],
+        persona: authRequest.user.persona,
+        shift_start: authRequest.user.shift_start,
+        shift_end: authRequest.user.shift_end,
+        timezone: authRequest.user.timezone,
+        authenticated: true,
+      };
+    } else {
+      user = {
+        id: 'anonymous',
+        username: 'anonymous',
+        roles: [],
+        offices: [],
+        authenticated: false,
+      };
+    }
+
+    const context: AuthorizationContext = {
+      user,
+      resource: authRequest.resource,
+      action: authRequest.action,
+      method: this.actionToMethod(authRequest.action),
+      path: `/cwms-data/${authRequest.resource}`,
+      timestamp: new Date(),
+      office_id: authRequest.context?.office_id,
+      data_source: authRequest.context?.data_source,
+    };
+
+    const decision = await this.opaService.authorize(context);
+
+    const decisionId = decision.decision_id || `auth-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const tsGroupEmbargo = this.buildTsGroupEmbargo(user);
+
+    this.fastify.log.info(
+      {
+        user: user.username,
+        resource: authRequest.resource,
+        action: authRequest.action,
+        allow: decision.allow,
+        decision_id: decisionId,
+      },
+      'Direct authorization request processed',
+    );
+
+    return {
+      decision: {
+        allow: decision.allow,
+        decision_id: decisionId,
+        reason: decision.reason,
+      },
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        roles: user.roles,
+        offices: user.offices,
+        primary_office: user.primary_office || user.offices?.[0] || 'HQ',
+        persona: user.persona,
+      },
+      constraints: {
+        allowed_offices: this.getAllowedOffices(user),
+        embargo_rules: decision.constraints?.embargo_rules || this.buildEmbargoRules(user, tsGroupEmbargo),
+        embargo_exempt: decision.constraints?.embargo_exempt || this.isEmbargoExempt(user),
+        ts_group_embargo: tsGroupEmbargo,
+        time_window: decision.constraints?.time_window || this.getTimeWindow(user),
+        data_classification: this.getAllowedClassifications(user),
+      },
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  private async extractUserFromToken(token: string): Promise<User> {
+    try {
+      const cleanToken = token.startsWith('Bearer ') ? token.substring(7) : token;
+      const decoded = decode(cleanToken) as any;
+
+      if (!decoded) {
+        throw new Error('Invalid token');
+      }
+
+      const username = decoded.preferred_username || decoded.sub;
+
+      if (username) {
+        const apiUser = await this.apiService.getUserContext(username, `Bearer ${cleanToken}`);
+        if (apiUser) {
+          return apiUser;
+        }
+      }
+
+      return {
+        id: decoded.sub || 'unknown',
+        username: username || 'unknown',
+        email: decoded.email,
+        roles: decoded.realm_access?.roles || [],
+        offices: [],
+        authenticated: true,
+      };
+    } catch (error) {
+      this.fastify.log.warn({ error }, 'Failed to extract user from token');
+      return {
+        id: 'anonymous',
+        username: 'anonymous',
+        roles: [],
+        offices: [],
+        authenticated: false,
+      };
+    }
+  }
+
+  private actionToMethod(action: string): string {
+    const actionToMethod: Record<string, string> = {
+      read: 'GET',
+      create: 'POST',
+      update: 'PUT',
+      delete: 'DELETE',
+    };
+    return actionToMethod[action] || 'GET';
+  }
+
+  private isEmbargoExempt(user: User): boolean {
+    const exemptPersonas = ['data_manager', 'water_manager', 'system_admin'];
+    const exemptRoles = ['system_admin', 'hec_employee', 'data_manager', 'water_manager'];
+
+    if (user.persona && exemptPersonas.includes(user.persona)) {
+      return true;
+    }
+
+    return user.roles?.some((role) => exemptRoles.includes(role)) || false;
+  }
+
+  private getTimeWindow(user: User): { restrict_hours: number } | null {
+    if (user.persona === 'dam_operator') {
+      return { restrict_hours: 8 };
+    }
+    return null;
   }
 
   private async extractUser(request: FastifyRequest): Promise<User> {
@@ -203,9 +352,10 @@ export class AuthorizationMiddleware {
   }
 
   private extractResource(request: FastifyRequest): string {
-    // Extract resource from the path
-    // e.g. /cwms-data/timeseries -> timeseries
-    const pathParts = request.url.split('/').filter(Boolean);
+    // Extract resource from the path, removing query parameters
+    // e.g. /cwms-data/timeseries?office=SWT -> timeseries
+    const pathWithoutQuery = request.url.split('?')[0];
+    const pathParts = pathWithoutQuery.split('/').filter(Boolean);
 
     if (pathParts.length >= 2 && pathParts[0] === 'cwms-data') {
       return pathParts[1];
@@ -228,6 +378,8 @@ export class AuthorizationMiddleware {
   }
 
   private addAuthorizationHeaders(request: FastifyRequest, user: User, decision: any): void {
+    const tsGroupEmbargo = this.buildTsGroupEmbargo(user);
+
     const authContext = {
       policy: {
         allow: decision.allow,
@@ -241,12 +393,14 @@ export class AuthorizationMiddleware {
         offices: user.offices,
         primary_office: user.primary_office || user.offices?.[0] || 'HQ',
         persona: user.persona,
+        ts_privileges: user.ts_privileges,
       },
       constraints: {
         allowed_offices: this.getAllowedOffices(user),
-        embargo_rules: decision.constraints?.embargo_rules || null,
-        embargo_exempt: decision.constraints?.embargo_exempt || false,
-        time_window: decision.constraints?.time_window || null,
+        embargo_rules: decision.constraints?.embargo_rules || this.buildEmbargoRules(user, tsGroupEmbargo),
+        embargo_exempt: decision.constraints?.embargo_exempt || this.isEmbargoExempt(user),
+        ts_group_embargo: tsGroupEmbargo,
+        time_window: decision.constraints?.time_window || this.getTimeWindow(user),
         data_classification: this.getAllowedClassifications(user),
         ...decision.filters,
       },
@@ -255,6 +409,41 @@ export class AuthorizationMiddleware {
     };
 
     request.headers['x-cwms-auth-context'] = JSON.stringify(authContext);
+  }
+
+  private buildTsGroupEmbargo(user: User): Record<string, number> | null {
+    if (!user.ts_privileges || user.ts_privileges.length === 0) {
+      return null;
+    }
+
+    const embargoMap: Record<string, number> = {};
+    for (const priv of user.ts_privileges) {
+      embargoMap[priv.ts_group_id] = priv.embargo_hours;
+    }
+
+    return embargoMap;
+  }
+
+  private buildEmbargoRules(
+    user: User,
+    tsGroupEmbargo: Record<string, number> | null,
+  ): Record<string, number> {
+    if (this.isEmbargoExempt(user) || !tsGroupEmbargo) {
+      return {};
+    }
+
+    let maxHours = 0;
+    for (const hours of Object.values(tsGroupEmbargo)) {
+      if (hours > maxHours) {
+        maxHours = hours;
+      }
+    }
+
+    if (maxHours > 0) {
+      return { default: maxHours };
+    }
+
+    return {};
   }
 
 

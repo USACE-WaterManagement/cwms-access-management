@@ -1,14 +1,14 @@
 import type { FastifyInstance } from 'fastify';
 
-import type { KeycloakService } from '../services/keycloak.service.js';
-import { createRoleSchema, validateRequest } from '../middleware/validation.js';
-import type { CreateRoleRequest } from '../types/index.js';
+import type { CdaService } from '../services/cda.service.js';
+import { extractAuthToken } from '../utils/auth.utils.js';
 import { logger } from '../utils/logger.js';
 
-export async function rolesRoutes(fastify: FastifyInstance, keycloakService: KeycloakService) {
+export async function rolesRoutes(fastify: FastifyInstance, cdaService: CdaService) {
   fastify.get('/roles', async (request, reply) => {
     try {
-      const roles = await keycloakService.getRoles();
+      const authToken = extractAuthToken(request);
+      const roles = await cdaService.getRoles(authToken);
 
       return reply.send({
         success: true,
@@ -27,7 +27,8 @@ export async function rolesRoutes(fastify: FastifyInstance, keycloakService: Key
   fastify.get('/roles/:id', async (request, reply) => {
     try {
       const { id } = request.params as { id: string };
-      const role = await keycloakService.getRole(id);
+      const authToken = extractAuthToken(request);
+      const role = await cdaService.getRole(id, authToken);
 
       if (!role) {
         return reply.status(404).send({
@@ -50,75 +51,17 @@ export async function rolesRoutes(fastify: FastifyInstance, keycloakService: Key
     }
   });
 
-  fastify.post(
-    '/roles',
-    {
-      preHandler: validateRequest(createRoleSchema),
-    },
-    async (request, reply) => {
-      try {
-        const roleData = request.body as CreateRoleRequest;
-        const role = await keycloakService.createRole(roleData);
+  fastify.post('/roles', async (_request, reply) => {
+    return reply.status(501).send({
+      success: false,
+      error: 'Role creation is not supported via CWMS Data API. Use CWMS security procedures directly.',
+    });
+  });
 
-        logger.info({ roleId: role.id, name: role.name }, 'Role created successfully');
-
-        return reply.status(201).send({
-          success: true,
-          data: role,
-        });
-      } catch (error) {
-        logger.error({ error }, 'Failed to create role');
-
-        if (error instanceof Error) {
-          if (error.message.includes('already exists')) {
-            return reply.status(409).send({
-              success: false,
-              error: error.message,
-            });
-          }
-
-          if (error.message.includes('Invalid role data')) {
-            return reply.status(400).send({
-              success: false,
-              error: error.message,
-            });
-          }
-        }
-
-        return reply.status(500).send({
-          success: false,
-          error: 'Failed to create role',
-        });
-      }
-    },
-  );
-
-  fastify.delete('/roles/:id', async (request, reply) => {
-    try {
-      const { id } = request.params as { id: string };
-
-      await keycloakService.deleteRole(id);
-
-      logger.info({ roleId: id }, 'Role deleted successfully');
-
-      return reply.send({
-        success: true,
-        message: 'Role deleted successfully',
-      });
-    } catch (error) {
-      logger.error({ error }, 'Failed to delete role');
-
-      if (error instanceof Error && error.message.includes('not found')) {
-        return reply.status(404).send({
-          success: false,
-          error: 'Role not found',
-        });
-      }
-
-      return reply.status(500).send({
-        success: false,
-        error: 'Failed to delete role',
-      });
-    }
+  fastify.delete('/roles/:id', async (_request, reply) => {
+    return reply.status(501).send({
+      success: false,
+      error: 'Role deletion is not supported via CWMS Data API. Use CWMS security procedures directly.',
+    });
   });
 }
