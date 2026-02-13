@@ -5,6 +5,7 @@ import axios from 'axios';
 
 import { logger } from '../utils/logger';
 import { getConfig, saveConfig } from '../utils/config';
+import { CONFIG_DIR_NAME } from '../constants/app';
 
 export const loginCommand = new Command('login')
   .description('Login to CWMS management API')
@@ -36,7 +37,7 @@ export const loginCommand = new Command('login')
         spinner.stop();
         console.log(chalk.green('Login successful'));
         console.log(chalk.cyan(`Logged in as: ${username}`));
-        console.log(chalk.gray('Token saved to ~/.cwms-admin/config.json'));
+        console.log(chalk.gray(`Token saved to ~/${CONFIG_DIR_NAME}/config.json`));
       } else {
         spinner.stop();
         console.error(chalk.red('Login failed'));

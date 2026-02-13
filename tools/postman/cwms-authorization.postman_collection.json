@@ -103,7 +103,7 @@
               "urlencoded": [
                 {
                   "key": "username",
-                  "value": "l2hectest",
+                  "value": "l2hectest.1234567890",
                   "type": "text"
                 },
                 {
@@ -130,7 +130,7 @@
               "port": "8080",
               "path": ["auth", "realms", "cwms", "protocol", "openid-connect", "token"]
             },
-            "description": "Get JWT token for l2hectest user (SPK office, cwms_user role)"
+            "description": "Get JWT token for l2hectest.1234567890 user (HEC Employee persona - SPK office, full access)"
           }
         },
         {
@@ -176,6 +176,231 @@
               "path": ["auth", "realms", "cwms", "protocol", "openid-connect", "token"]
             },
             "description": "Get JWT token for l1hectest user (SPL office, no roles - for testing access denial)"
+          }
+        },
+        {
+          "name": "Get JWT Token - damop001",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "damop001",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "damop001",
+                  "type": "text"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "cwms",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/auth/realms/cwms/protocol/openid-connect/token",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["auth", "realms", "cwms", "protocol", "openid-connect", "token"]
+            },
+            "description": "Get JWT token for damop001 user (Dam Operator persona - shift-restricted, manual data entry)"
+          }
+        },
+        {
+          "name": "Get JWT Token - datamgr001",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "datamgr001",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "datamgr001",
+                  "type": "text"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "cwms",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/auth/realms/cwms/protocol/openid-connect/token",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["auth", "realms", "cwms", "protocol", "openid-connect", "token"]
+            },
+            "description": "Get JWT token for datamgr001 user (Data Manager persona - full data access, embargo exempt)"
+          }
+        },
+        {
+          "name": "Get JWT Token - extpartner",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "extpartner",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "extpartner",
+                  "type": "text"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "cwms",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/auth/realms/cwms/protocol/openid-connect/token",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["auth", "realms", "cwms", "protocol", "openid-connect", "token"]
+            },
+            "description": "Get JWT token for extpartner user (External Partner persona - public data only, with embargo)"
+          }
+        },
+        {
+          "name": "Get JWT Token - apicollector",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "apicollector",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "apicollector",
+                  "type": "text"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "cwms",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/auth/realms/cwms/protocol/openid-connect/token",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["auth", "realms", "cwms", "protocol", "openid-connect", "token"]
+            },
+            "description": "Get JWT token for apicollector user (API Collector persona - read-only, collect data)"
+          }
+        },
+        {
+          "name": "Get JWT Token - apiprocessor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "apiprocessor",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "apiprocessor",
+                  "type": "text"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "cwms",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/auth/realms/cwms/protocol/openid-connect/token",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["auth", "realms", "cwms", "protocol", "openid-connect", "token"]
+            },
+            "description": "Get JWT token for apiprocessor user (API Processor persona - automated processing)"
           }
         }
       ]
@@ -460,6 +685,348 @@
           }
         }
       ]
+    },
+    {
+      "name": "7. Direct Authorization API (/authorize)",
+      "description": "Tests for the /authorize endpoint - allows external services to get authorization decisions without proxying requests",
+      "item": [
+        {
+          "name": "Dam Operator - Read Timeseries (ALLOWED)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": {\n    \"id\": \"damop001\",\n    \"username\": \"damop001\",\n    \"roles\": [\"dam_operator\"],\n    \"offices\": [\"SWT\"],\n    \"persona\": \"dam_operator\",\n    \"shift_start\": 6,\n    \"shift_end\": 18,\n    \"timezone\": \"America/Chicago\"\n  },\n  \"resource\": \"timeseries\",\n  \"action\": \"read\",\n  \"context\": {\n    \"office_id\": \"SWT\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/authorize",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["authorize"]
+            },
+            "description": "Dam operator reading timeseries - should be ALLOWED with 8-hour time window constraint"
+          }
+        },
+        {
+          "name": "Dam Operator - Create During Shift (ALLOWED)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": {\n    \"id\": \"damop001\",\n    \"username\": \"damop001\",\n    \"roles\": [\"dam_operator\"],\n    \"offices\": [\"SWT\"],\n    \"persona\": \"dam_operator\",\n    \"shift_start\": 0,\n    \"shift_end\": 23,\n    \"timezone\": \"America/Chicago\"\n  },\n  \"resource\": \"timeseries\",\n  \"action\": \"create\",\n  \"context\": {\n    \"office_id\": \"SWT\",\n    \"data_source\": \"MANUAL\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/authorize",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["authorize"]
+            },
+            "description": "Dam operator creating MANUAL timeseries during shift (0-23 covers all hours) - should be ALLOWED. Note: data_source must be MANUAL for dam operators."
+          }
+        },
+        {
+          "name": "Dam Operator - Create Outside Shift (DENIED)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": {\n    \"id\": \"damop001\",\n    \"username\": \"damop001\",\n    \"roles\": [\"dam_operator\"],\n    \"offices\": [\"SWT\"],\n    \"persona\": \"dam_operator\",\n    \"shift_start\": 22,\n    \"shift_end\": 23,\n    \"timezone\": \"America/Chicago\"\n  },\n  \"resource\": \"timeseries\",\n  \"action\": \"create\",\n  \"context\": {\n    \"office_id\": \"SWT\",\n    \"data_source\": \"MANUAL\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/authorize",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["authorize"]
+            },
+            "description": "Dam operator creating MANUAL timeseries outside shift (10PM-11PM only) - DENIED because current hour is outside shift window"
+          }
+        },
+        {
+          "name": "Data Manager - Embargo Exempt (ALLOWED)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": {\n    \"id\": \"datamgr001\",\n    \"username\": \"datamgr001\",\n    \"roles\": [\"data_manager\", \"cwms_user\"],\n    \"offices\": [\"SPK\"],\n    \"persona\": \"data_manager\"\n  },\n  \"resource\": \"timeseries\",\n  \"action\": \"read\",\n  \"context\": {\n    \"office_id\": \"SPK\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/authorize",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["authorize"]
+            },
+            "description": "Data manager reading timeseries - should be ALLOWED with embargo_exempt: true"
+          }
+        },
+        {
+          "name": "Water Manager - Standard Access (ALLOWED)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": {\n    \"id\": \"watermgr001\",\n    \"username\": \"watermgr001\",\n    \"roles\": [\"water_manager\", \"cwms_user\"],\n    \"offices\": [\"SWT\", \"SPK\"],\n    \"persona\": \"water_manager\"\n  },\n  \"resource\": \"timeseries\",\n  \"action\": \"read\",\n  \"context\": {\n    \"office_id\": \"SWT\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/authorize",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["authorize"]
+            },
+            "description": "Water manager reading timeseries - should be ALLOWED with embargo_exempt: true and multiple offices"
+          }
+        },
+        {
+          "name": "HEC Employee - Full Access (ALLOWED)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": {\n    \"id\": \"l2hectest\",\n    \"username\": \"l2hectest\",\n    \"roles\": [\"hec_employee\", \"cwms_user\"],\n    \"offices\": [\"SPK\"]\n  },\n  \"resource\": \"timeseries\",\n  \"action\": \"read\",\n  \"context\": {\n    \"office_id\": \"SPK\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/authorize",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["authorize"]
+            },
+            "description": "HEC employee reading timeseries - should be ALLOWED with embargo_exempt: true and all data classifications"
+          }
+        },
+        {
+          "name": "Anonymous User - Public Resource (ALLOWED)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resource\": \"offices\",\n  \"action\": \"read\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/authorize",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["authorize"]
+            },
+            "description": "Anonymous user reading public resource (offices) - should be ALLOWED"
+          }
+        },
+        {
+          "name": "Anonymous User - Protected Resource (DENIED)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resource\": \"timeseries\",\n  \"action\": \"create\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/authorize",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["authorize"]
+            },
+            "description": "Anonymous user creating timeseries - should be DENIED"
+          }
+        },
+        {
+          "name": "User Without Office Access (DENIED)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": {\n    \"id\": \"user001\",\n    \"username\": \"user001\",\n    \"roles\": [\"cwms_user\"],\n    \"offices\": [\"SWT\"]\n  },\n  \"resource\": \"timeseries\",\n  \"action\": \"create\",\n  \"context\": {\n    \"office_id\": \"SPK\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/authorize",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["authorize"]
+            },
+            "description": "User with SWT office trying to create in SPK - should be DENIED (office mismatch)"
+          }
+        },
+        {
+          "name": "JWT Token Authentication",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jwt_token\": \"{{jwt_token}}\",\n  \"resource\": \"timeseries\",\n  \"action\": \"read\",\n  \"context\": {\n    \"office_id\": \"SWT\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/authorize",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["authorize"]
+            },
+            "description": "Authorization using JWT token instead of user object - extracts user context from token"
+          }
+        },
+        {
+          "name": "Validation Error - Missing Resource",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"read\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/authorize",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["authorize"]
+            },
+            "description": "Missing required 'resource' field - should return 400 Bad Request"
+          }
+        },
+        {
+          "name": "Validation Error - Invalid Action",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resource\": \"timeseries\",\n  \"action\": \"execute\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/authorize",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["authorize"]
+            },
+            "description": "Invalid action (must be read/create/update/delete) - should return 400 Bad Request"
+          }
+        },
+        {
+          "name": "Embargo Rules - SPK Office (168 hours)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": {\n    \"id\": \"user001\",\n    \"username\": \"user001\",\n    \"roles\": [\"cwms_user\"],\n    \"offices\": [\"SPK\"]\n  },\n  \"resource\": \"timeseries\",\n  \"action\": \"read\",\n  \"context\": {\n    \"office_id\": \"SPK\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/authorize",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["authorize"]
+            },
+            "description": "Regular user reading SPK timeseries - check embargo_rules shows SPK: 168 (7 days)"
+          }
+        },
+        {
+          "name": "Embargo Rules - SWT Office (72 hours)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": {\n    \"id\": \"user001\",\n    \"username\": \"user001\",\n    \"roles\": [\"cwms_user\"],\n    \"offices\": [\"SWT\"]\n  },\n  \"resource\": \"timeseries\",\n  \"action\": \"read\",\n  \"context\": {\n    \"office_id\": \"SWT\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/authorize",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["authorize"]
+            },
+            "description": "Regular user reading SWT timeseries - check embargo_rules shows SWT: 72 (3 days)"
+          }
+        }
+      ]
     }
   ],
   "variable": [
@@ -482,6 +1049,12 @@
       "key": "opa_url",
       "value": "http://localhost:8181",
       "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string",
+      "description": "JWT token obtained from Keycloak - set this after running an Authentication request"
     }
   ]
 }

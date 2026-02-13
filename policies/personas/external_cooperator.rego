@@ -1,6 +1,7 @@
 package cwms.personas.external_cooperator
 
 import data.cwms.helpers.offices
+import data.cwms.helpers.time_rules
 import future.keywords.contains
 import future.keywords.if
 import future.keywords.in
@@ -17,6 +18,7 @@ allow if {
     input.context.parameter in input.user.allowed_parameters
     input.context.classification != "sensitive"
     partnership_active(input.user)
+    not time_rules.data_under_ts_group_embargo(input.context, input.user)
 }
 
 allow if {

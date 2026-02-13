@@ -18,6 +18,10 @@ env.ts
 .nx/workspace-data
 
 dist
+coverage
 apps/services/entity-manager/admin_token.json
 tmp
 release
+
+# runtime logs
+*.log

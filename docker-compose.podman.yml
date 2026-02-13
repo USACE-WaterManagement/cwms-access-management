@@ -36,10 +36,12 @@ services:
       NODE_OPTIONS: --no-deprecation
       MANAGEMENT_API_PORT: ${MANAGEMENT_API_PORT:-3002}
       MANAGEMENT_API_HOST: ${MANAGEMENT_API_HOST:-0.0.0.0}
-      KEYCLOAK_URL: ${KEYCLOAK_URL:-http://auth:8080/auth}
-      KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER:-admin}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      CDA_API_URL: ${CDA_API_URL:-http://data-api:7000/cwms-data}
       OPA_URL: ${OPA_URL:-http://opa:8181}
+      KEYCLOAK_URL: ${KEYCLOAK_URL:-http://auth:8080/auth}
+      KEYCLOAK_ISSUER_URL: ${KEYCLOAK_ISSUER_URL:-http://localhost:8080/auth}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM:-cwms}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-cwms}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     depends_on:
       - opa

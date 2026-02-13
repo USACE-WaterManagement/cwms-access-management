@@ -1,11 +1,11 @@
 {
-  "name": "@usace/cwms-admin",
+  "name": "@usace-watermanagement/cwms-swims-admin",
   "version": "0.1.0",
   "description": "CWMS Access Management CLI tool",
   "private": false,
   "type": "module",
   "bin": {
-    "cwms-admin": "./index.js"
+    "cwms-swims-admin": "./index.js"
   },
   "files": [
     "index.js",

@@ -86,7 +86,7 @@ pnpm dev
 
 ### Installing Globally (Optional)
 
-Install globally to use `cwms-admin` command from anywhere:
+Install globally to use `cwms-swims-admin` command from anywhere:
 
 ```bash
 # Link for local development
@@ -94,8 +94,8 @@ cd dist/apps/cli/management-cli
 npm link
 
 # Now run from anywhere
-cwms-admin --help
-cwms-admin users list
+cwms-swims-admin --help
+cwms-swims-admin users list
 ```
 
 ## Available Scripts
@@ -118,10 +118,10 @@ You can run commands in two ways:
 
 2. **Global command** (after `npm link`):
    ```bash
-   cwms-admin <command>
+   cwms-swims-admin <command>
    ```
 
-Examples below use the global command format. Replace `cwms-admin` with `./dist/apps/cli/management-cli/index.js` if not
+Examples below use the global command format. Replace `cwms-swims-admin` with `./dist/apps/cli/management-cli/index.js` if not
 installed globally.
 
 ### Authentication
@@ -129,7 +129,7 @@ installed globally.
 Login to the management API:
 
 ```bash
-cwms-admin login -u admin -p admin -a http://localhost:3002
+cwms-swims-admin login -u admin -p admin -a http://localhost:3002
 # or
 ./dist/apps/cli/management-cli/index.js login -u admin -p admin -a http://localhost:3002
 ```
@@ -137,17 +137,17 @@ cwms-admin login -u admin -p admin -a http://localhost:3002
 Logout:
 
 ```bash
-cwms-admin logout
+cwms-swims-admin logout
 ```
 
-The CLI stores authentication tokens in `~/.cwms-admin/config.json`.
+The CLI stores authentication tokens in `~/.cwms-swims-admin/config.json`.
 
 ### Users
 
 List all users:
 
 ```bash
-cwms-admin users list
+cwms-swims-admin users list
 # or
 ./dist/apps/cli/management-cli/index.js users list
 ```
@@ -155,7 +155,7 @@ cwms-admin users list
 Show user details:
 
 ```bash
-cwms-admin users show <user-id>
+cwms-swims-admin users show <user-id>
 # or
 ./dist/apps/cli/management-cli/index.js users show <user-id>
 ```
@@ -163,7 +163,7 @@ cwms-admin users show <user-id>
 Add a new user (interactive prompts):
 
 ```bash
-cwms-admin users add
+cwms-swims-admin users add
 # or
 ./dist/apps/cli/management-cli/index.js users add
 ```
@@ -171,19 +171,19 @@ cwms-admin users add
 Add a new user (with flags):
 
 ```bash
-cwms-admin users add -u <username> -e <email> -p <password> -n "<full-name>"
+cwms-swims-admin users add -u <username> -e <email> -p <password> -n "<full-name>"
 ```
 
 Remove a user:
 
 ```bash
-cwms-admin users remove <user-id>
+cwms-swims-admin users remove <user-id>
 ```
 
 Remove a user (skip confirmation prompt):
 
 ```bash
-cwms-admin users remove <user-id> -y
+cwms-swims-admin users remove <user-id> -y
 ```
 
 ### Roles
@@ -191,37 +191,37 @@ cwms-admin users remove <user-id> -y
 List all roles:
 
 ```bash
-cwms-admin roles list
+cwms-swims-admin roles list
 ```
 
 Show role details:
 
 ```bash
-cwms-admin roles show <role-id>
+cwms-swims-admin roles show <role-id>
 ```
 
 Add a new role (interactive prompts):
 
 ```bash
-cwms-admin roles add
+cwms-swims-admin roles add
 ```
 
 Add a new role (with flags):
 
 ```bash
-cwms-admin roles add -n <role_name> -d "<description>"
+cwms-swims-admin roles add -n <role_name> -d "<description>"
 ```
 
 Remove a role:
 
 ```bash
-cwms-admin roles remove <role-id>
+cwms-swims-admin roles remove <role-id>
 ```
 
 Remove a role (skip confirmation prompt):
 
 ```bash
-cwms-admin roles remove <role-id> -y
+cwms-swims-admin roles remove <role-id> -y
 ```
 
 ### Policies
@@ -229,20 +229,20 @@ cwms-admin roles remove <role-id> -y
 List all policies:
 
 ```bash
-cwms-admin policies list
+cwms-swims-admin policies list
 ```
 
 Show policy details:
 
 ```bash
-cwms-admin policies show <name>
+cwms-swims-admin policies show <name>
 ```
 
 ### Global Options
 
 ```bash
-cwms-admin --version
-cwms-admin --help
+cwms-swims-admin --version
+cwms-swims-admin --help
 ```
 
 ## Project Structure
@@ -266,7 +266,7 @@ src/
 
 ## Environment Variables
 
-The CLI uses a configuration file stored at `~/.cwms-admin/config.json` for authentication tokens and API URL settings.
+The CLI uses a configuration file stored at `~/.cwms-swims-admin/config.json` for authentication tokens and API URL settings.
 
 You can also set these environment variables for development:
 

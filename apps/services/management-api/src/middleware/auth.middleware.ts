@@ -1,16 +1,22 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
+import { KeycloakAuthService } from '../services/keycloak-auth.service.js';
+
+const KEYCLOAK_URL = process.env.KEYCLOAK_URL || 'http://localhost:8080/auth';
+const KEYCLOAK_REALM = process.env.KEYCLOAK_REALM || 'cwms';
+const KEYCLOAK_CLIENT_ID = process.env.KEYCLOAK_CLIENT_ID || 'cwms';
+const KEYCLOAK_ISSUER_URL = process.env.KEYCLOAK_ISSUER_URL || KEYCLOAK_URL;
+
+const keycloakAuthService = new KeycloakAuthService(KEYCLOAK_URL, KEYCLOAK_REALM, KEYCLOAK_CLIENT_ID, KEYCLOAK_ISSUER_URL);
 
 export interface AuthUser {
+  sub: string;
   username: string;
+  email?: string;
+  roles: string[];
 }
 
-export async function authMiddleware(
-  request: FastifyRequest,
-  reply: FastifyReply,
-) {
+export async function authMiddleware(request: FastifyRequest, reply: FastifyReply) {
   try {
     const authHeader = request.headers.authorization;
 
@@ -24,13 +30,19 @@ export async function authMiddleware(
     const token = authHeader.substring(7);
 
     try {
-      const decoded = jwt.verify(token, JWT_SECRET) as AuthUser;
+      const decoded = await keycloakAuthService.validateToken(token);
 
-      (request as any).user = decoded;
+      (request as any).user = {
+        sub: decoded.sub,
+        username: decoded.preferred_username,
+        email: decoded.email,
+        roles: decoded.realm_access?.roles || [],
+      } as AuthUser;
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Token validation failed';
       return reply.status(401).send({
         success: false,
-        error: 'Invalid or expired token',
+        error: message,
       });
     }
   } catch (error) {
@@ -41,6 +53,6 @@ export async function authMiddleware(
   }
 }
 
-export function generateToken(username: string): string {
-  return jwt.sign({ username }, JWT_SECRET, { expiresIn: '24h' });
+export function getKeycloakAuthService(): KeycloakAuthService {
+  return keycloakAuthService;
 }
