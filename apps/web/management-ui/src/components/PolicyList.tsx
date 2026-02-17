@@ -21,8 +21,8 @@ export default function PolicyList({ policies, selectedPolicy, onSelectPolicy }:
             aria-current={selectedPolicy?.id === policy.id ? 'true' : undefined}
             className={`w-full text-left p-3 rounded-lg transition-all ${
               selectedPolicy?.id === policy.id
-                ? 'bg-primary/20 border border-primary/50 shadow-lg shadow-primary/10 text-foreground'
-                : 'bg-card border border-gray-300 hover:bg-primary/10 hover:border-primary/30 text-card-foreground'
+                ? 'bg-blue-100 border border-blue-300 shadow-lg shadow-blue-100/50 text-foreground'
+                : 'bg-card border border-gray-300 hover:bg-blue-50 hover:border-blue-200 text-card-foreground'
             }`}>
             <div className='flex items-start justify-between gap-2'>
               <div className='flex-1 min-w-0'>
@@ -31,7 +31,7 @@ export default function PolicyList({ policies, selectedPolicy, onSelectPolicy }:
               </div>
               {selectedPolicy?.id === policy.id && (
                 <Check
-                  className='w-4 h-4 text-primary flex-shrink-0 mt-0.5'
+                  className='w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5'
                   aria-hidden='true'
                 />
               )}

@@ -235,7 +235,7 @@ cwms-swims-admin policies list
 Show policy details:
 
 ```bash
-cwms-swims-admin policies show <name>
+cwms-swims-admin policies show <policy-id>
 ```
 
 ### Global Options

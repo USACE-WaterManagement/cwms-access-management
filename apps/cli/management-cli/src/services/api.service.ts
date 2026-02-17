@@ -146,7 +146,7 @@ export class ApiService {
 
   async getPolicy(id: string): Promise<Policy> {
     try {
-      const response = await this.client.get<ApiResponse<Policy>>(`/policies/${id}`);
+      const response = await this.client.get<ApiResponse<Policy>>(`/policies/${encodeURIComponent(id)}`);
 
       if (!response.data.success || !response.data.data) {
         throw new Error(response.data.error || 'Failed to fetch policy');

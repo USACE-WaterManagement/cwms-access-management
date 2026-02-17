@@ -32,7 +32,7 @@ export default function PoliciesPage() {
 
   return (
     <div className='px-4 py-6 sm:px-0'>
-      <div className='px-4 py-5 sm:px-6 mb-4'>
+      <div className='px-2 py-5 mb-4'>
         <div className='flex items-center gap-3'>
           <div className='h-10 w-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md'>
             <Code2
