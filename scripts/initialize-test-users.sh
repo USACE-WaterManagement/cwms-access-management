@@ -24,7 +24,7 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 echo "Logging into Keycloak..."
-podman exec auth /opt/keycloak/bin/kcadm.sh config credentials \
+docker exec auth /opt/keycloak/bin/kcadm.sh config credentials \
   --server $KEYCLOAK_URL \
   --realm master \
   --user $ADMIN_USER \
@@ -36,7 +36,7 @@ create_or_get_user() {
     local first_name=$3
     local last_name=$4
 
-    USER_ID=$(podman exec auth /opt/keycloak/bin/kcadm.sh get users \
+    USER_ID=$(docker exec auth /opt/keycloak/bin/kcadm.sh get users \
       -r $REALM \
       -q username=$username \
       --fields id \
@@ -44,7 +44,7 @@ create_or_get_user() {
       --noquotes 2>/dev/null | tail -1)
 
     if [ -z "$USER_ID" ] || [ "$USER_ID" == "id" ]; then
-        RESULT=$(podman exec auth /opt/keycloak/bin/kcadm.sh create users \
+        RESULT=$(docker exec auth /opt/keycloak/bin/kcadm.sh create users \
           -r $REALM \
           -s username=$username \
           -s enabled=true \
@@ -56,7 +56,7 @@ create_or_get_user() {
         if [[ $RESULT == *"Created new user"* ]]; then
             USER_ID=$(echo $RESULT | grep -oE '[a-f0-9-]{36}')
         else
-            USER_ID=$(podman exec auth /opt/keycloak/bin/kcadm.sh get users \
+            USER_ID=$(docker exec auth /opt/keycloak/bin/kcadm.sh get users \
               -r $REALM \
               -q username=$username \
               --fields id \
@@ -64,7 +64,7 @@ create_or_get_user() {
               --noquotes 2>/dev/null | tail -1)
         fi
 
-        podman exec auth /opt/keycloak/bin/kcadm.sh set-password \
+        docker exec auth /opt/keycloak/bin/kcadm.sh set-password \
           -r $REALM \
           --username $username \
           --new-password $username 2>/dev/null || true
@@ -84,7 +84,7 @@ APIPROC_USER_ID=$(create_or_get_user "apiprocessor" "apiprocessor@usace.mil" "AP
 EXTPART_USER_ID=$(create_or_get_user "extpartner" "extpartner@usace.mil" "External" "Partner")
 
 echo "Configuring database users..."
-podman exec $DB_CONTAINER bash -c "cat <<'EOF' | sqlplus -s CWMS_20/simplecwmspasswD1@FREEPDB1
+docker exec $DB_CONTAINER bash -c "cat <<'EOF' | sqlplus -s CWMS_20/simplecwmspasswD1@FREEPDB1
 SET SERVEROUTPUT ON;
 WHENEVER SQLERROR CONTINUE;
 
@@ -192,7 +192,7 @@ EOF"
 
 echo ""
 echo "Creating API keys..."
-podman exec $DB_CONTAINER bash -c "cat <<'EOF' | sqlplus -s CWMS_20/simplecwmspasswD1@FREEPDB1
+docker exec $DB_CONTAINER bash -c "cat <<'EOF' | sqlplus -s CWMS_20/simplecwmspasswD1@FREEPDB1
 WHENEVER SQLERROR CONTINUE;
 
 BEGIN

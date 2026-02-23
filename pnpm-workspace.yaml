@@ -1,4 +1,10 @@
 packages:
-  - 'apps/**'
-  - 'libs/**'
-  - 'packages/**'
+  - apps/**
+  - libs/**
+  - packages/**
+
+onlyBuiltDependencies:
+  - esbuild
+  - msw
+  - nx
+  - unrs-resolver
