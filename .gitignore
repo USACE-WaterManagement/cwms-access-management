@@ -11,6 +11,8 @@ env.ts
 
 # env file
 .env
+.env*
+~.env.example
 
 .DS_Store
 

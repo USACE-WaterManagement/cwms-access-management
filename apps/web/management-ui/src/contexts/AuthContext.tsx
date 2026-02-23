@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 interface AuthContextType {
   token: string | null;
@@ -19,7 +19,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const storedUsername = localStorage.getItem('username');
-
     if (storedToken && storedUsername) {
       setToken(storedToken);
       setUsername(storedUsername);
@@ -27,55 +26,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const login = async (username: string, password: string) => {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3002';
-    const response = await fetch(`${apiUrl}/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username, password }),
-    });
+  const login = useCallback(
+    async (username: string, password: string) => {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3002';
+      const response = await fetch(`${apiUrl}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-    if (!response.ok) {
-      const error = await response.json();
+      if (!response.ok) {
+        const error = await response.json();
 
-      throw new Error(error.error || 'Login failed');
-    }
+        throw new Error(error.error || 'Login failed');
+      }
 
-    const data = await response.json();
+      const data = await response.json();
+      if (data.success && data.data !== undefined) {
+        setToken(data.data.access_token);
+        setUsername(data.data.username);
+        localStorage.setItem('token', data.data.access_token);
+        localStorage.setItem('username', data.data.username);
+      } else {
+        throw new Error(data.error || 'Login failed');
+      }
+    },
+    [setToken, setUsername],
+  );
 
-    if (data.success) {
-      setToken(data.data.token);
-      setUsername(data.data.username);
-      localStorage.setItem('token', data.data.token);
-      localStorage.setItem('username', data.data.username);
-    } else {
-      throw new Error(data.error || 'Login failed');
-    }
-  };
-
-  const logout = () => {
+  const logout = useCallback(() => {
     setToken(null);
     setUsername(null);
     localStorage.removeItem('token');
     localStorage.removeItem('username');
-  };
+  }, [setToken, setUsername]);
 
-  return (
-    <AuthContext.Provider
-      value={{
-        token,
-        username,
-        login,
-        logout,
-        isAuthenticated: !!token,
-        isLoading,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  const authenticated = useMemo(() => token !== null, [token]);
+
+  const contextValue = useMemo(() => {
+    return {
+      token,
+      username,
+      login,
+      logout,
+      isAuthenticated: authenticated,
+      isLoading,
+    };
+  }, [token, username, login, logout, authenticated, isLoading]);
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

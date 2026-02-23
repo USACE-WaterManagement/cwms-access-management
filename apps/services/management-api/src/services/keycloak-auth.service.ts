@@ -137,7 +137,6 @@ export class KeycloakAuthService {
   async validateToken(token: string): Promise<DecodedToken> {
     try {
       const decoded = jwt.decode(token, { complete: true });
-
       if (!decoded || !decoded.header.kid) {
         throw new Error('Invalid token format');
       }
