@@ -1,6 +1,6 @@
 export const config = {
   keycloak: {
-    url: process.env.KEYCLOAK_URL || 'http://localhost:8080',
+    url: process.env.KEYCLOAK_URL || 'http://localhost:8081',
     realm: 'cwms',
     clientId: 'cwms',
   },

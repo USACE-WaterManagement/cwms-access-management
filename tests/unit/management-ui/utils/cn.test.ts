@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import { cn } from '../../../../apps/web/management-ui/src/lib/utils';
+import { cn } from '../../../../apps/web/management-ui/src/utils/cn';
 
 describe('cn', () => {
   it('merges class names', () => {
