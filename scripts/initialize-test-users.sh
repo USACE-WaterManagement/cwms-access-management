@@ -209,8 +209,7 @@ EXCEPTION WHEN OTHERS THEN
 END;
 /
 
-DELETE FROM at_api_keys WHERE userid IN ('CWMS_20', 'M5HECTEST', 'L2HECTEST');
-
+DELETE FROM at_api_keys WHERE key_name IN ('authorization-proxy', 'test-key');
 INSERT INTO at_api_keys VALUES('CWMS_20', 'authorization-proxy', 'AuthProxyKey2025SecureRandomString', SYSDATE, SYSDATE + 365);
 INSERT INTO at_api_keys VALUES('M5HECTEST', 'test-key', 'testkey2', SYSDATE, SYSDATE + 365);
 INSERT INTO at_api_keys VALUES('L2HECTEST', 'test-key', 'l2userkey', SYSDATE, SYSDATE + 365);

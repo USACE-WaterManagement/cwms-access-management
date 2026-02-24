@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { getToken, clearTokenCache } from '../helpers/auth.js';
-import { directApiRequest, proxyRequest, opaRequest } from '../helpers/http.js';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+
+import { clearTokenCache, getToken } from '../helpers/auth.js';
+import { directApiRequest, opaRequest, proxyRequest } from '../helpers/http.js';
 import { config } from '../setup/config.js';
 import { testLogger } from '../helpers/logger.js';
 
